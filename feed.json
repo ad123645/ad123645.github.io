@@ -7,6 +7,16 @@
     "home_page_url": "http://yoursite.com",
     "items": [
         {
+            "id": "http://yoursite.com/%E3%80%90%E7%AE%97%E6%B3%95%E3%80%91%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98/",
+            "url": "http://yoursite.com/%E3%80%90%E7%AE%97%E6%B3%95%E3%80%91%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98/",
+            "title": "【算法】背包问题",
+            "date_published": "2024-08-24T03:46:57.000Z",
+            "content_html": "",
+            "tags": [
+                "动态规划"
+            ]
+        },
+        {
             "id": "http://yoursite.com/hello-world/",
             "url": "http://yoursite.com/hello-world/",
             "title": "Hello World",
