@@ -1,28 +1,93 @@
 ---
 import PageLayout from '@/layouts/PageLayout.astro';
 import ArchiveList from '@/components/blog/ArchiveList.astro';
+import CatalogCard from '@/components/catalog/CatalogCard.astro';
 import { getPublishedPosts } from '@/features/blog/api/posts';
+import { getTopLevelCatalogNodesFromPosts } from '@/features/catalog/helpers';
 import { withBase } from '@/utils/paths';
 
 const posts = await getPublishedPosts();
+const topCatalog = getTopLevelCatalogNodesFromPosts(posts).slice(0, 4);
 ---
 
 <PageLayout
   title="归档"
   description="所有文章的归档索引"
-  intro="当文章慢慢变多，这里会像抽屉式目录一样变得好用。"
+  intro="当文章慢慢变多，这里既能按时间翻，也能沿着馆藏书架慢慢找。"
 >
   <div class="section-toolbar">
     <a href={withBase('/blog')} class="pill-link">回到博客</a>
+    <a href={withBase('/catalog')} class="pill-link">查看完整目录</a>
   </div>
 
-  <div class="archive-panel card-surface">
-    <ArchiveList posts={posts} />
+  <div class="archive-grid">
+    <div class="archive-panel card-surface">
+      <ArchiveList posts={posts} />
+    </div>
+
+    {topCatalog.length > 0 && (
+      <aside class="catalog-panel">
+        <div class="panel-head">
+          <p class="panel-kicker">按书架看</p>
+          <h2>活跃分区</h2>
+          <p>完整目录保留全部一级与二级类，这里先摆出最近最常被翻开的几架。</p>
+        </div>
+        <div class="panel-grid">
+          {topCatalog.map((node) => <CatalogCard node={node} compact />)}
+        </div>
+      </aside>
+    )}
   </div>
 
   <style>
+    .archive-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.9fr);
+      gap: 1rem;
+    }
+
     .archive-panel {
       padding: 1rem 1.15rem;
+    }
+
+    .catalog-panel {
+      display: grid;
+      gap: 1rem;
+      align-content: start;
+    }
+
+    .panel-head {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .panel-kicker,
+    .panel-head p:last-child {
+      margin: 0;
+      color: var(--text-muted);
+    }
+
+    .panel-kicker {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 1.45rem;
+      line-height: 1.2;
+    }
+
+    .panel-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    @media (max-width: 980px) {
+      .archive-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </PageLayout>

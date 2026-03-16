@@ -3,7 +3,7 @@ import { withBase } from '@/utils/paths';
 import { TILE_COLORS } from '@/features/rpg/config/tiles';
 import { PLAYER_SIZE, PLAYER_SPEED } from '@/features/rpg/config/constants';
 import { getScene } from '@/features/rpg/core/sceneManager';
-import { isBlocked } from '@/features/rpg/core/collision';
+import { findNearestOpenPosition, isBlocked } from '@/features/rpg/core/collision';
 import { getInteractableInFront } from '@/features/rpg/core/interaction';
 import { resolveMovement, isInteractKey } from '@/features/rpg/core/input';
 import { createPlayer, getPlayerRect } from '@/features/rpg/entities/player';
@@ -12,14 +12,250 @@ import HintBar from '@/features/rpg/components/HintBar';
 import DialogPanel from '@/features/rpg/components/DialogPanel';
 import SceneTitle from '@/features/rpg/components/SceneTitle';
 import { SCENE_META } from '@/features/rpg/config/sceneMeta';
+import type { DecorationObject, InteractableObject, ObstacleObject, SceneDefinition } from '@/types/rpg';
+
+const ROOM_TITLES = {
+  hall: '大厅',
+  library: '图书馆',
+  gameRoom: '游戏室',
+} as const;
+
+function roundedRect(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  radius = 8
+) {
+  const r = Math.min(radius, w / 2, h / 2);
+  context.beginPath();
+  context.moveTo(x + r, y);
+  context.arcTo(x + w, y, x + w, y + h, r);
+  context.arcTo(x + w, y + h, x, y + h, r);
+  context.arcTo(x, y + h, x, y, r);
+  context.arcTo(x, y, x + w, y, r);
+  context.closePath();
+}
+
+function fillRoundedRect(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  fill: string,
+  radius = 8
+) {
+  roundedRect(context, x, y, w, h, radius);
+  context.fillStyle = fill;
+  context.fill();
+}
+
+function strokeRoundedRect(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  stroke: string,
+  radius = 8,
+  lineWidth = 1
+) {
+  roundedRect(context, x, y, w, h, radius);
+  context.lineWidth = lineWidth;
+  context.strokeStyle = stroke;
+  context.stroke();
+}
 
 function drawSceneLabels(context: CanvasRenderingContext2D, sceneName: string) {
+  fillRoundedRect(context, 14, 14, 86, 26, 'rgba(251, 248, 242, 0.86)', 999);
+  strokeRoundedRect(context, 14, 14, 86, 26, 'rgba(137, 120, 102, 0.18)', 999, 1);
   context.save();
-  context.fillStyle = 'rgba(47, 42, 36, 0.78)';
+  context.fillStyle = 'rgba(47, 42, 36, 0.82)';
   context.font = '600 12px ui-serif, serif';
   context.textAlign = 'left';
-  context.fillText(sceneName, 18, 26);
+  context.fillText(sceneName, 26, 31);
   context.restore();
+}
+
+function drawBackdrop(context: CanvasRenderingContext2D, scene: SceneDefinition) {
+  context.fillStyle = TILE_COLORS[scene.baseTile] ?? '#efe6d8';
+  context.fillRect(0, 0, scene.width, scene.height);
+
+  const gradient = context.createLinearGradient(0, 0, 0, scene.height);
+  gradient.addColorStop(0, 'rgba(255, 255, 255, 0.18)');
+  gradient.addColorStop(0.55, 'rgba(255, 255, 255, 0)');
+  gradient.addColorStop(1, 'rgba(71, 58, 45, 0.06)');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, scene.width, scene.height);
+
+  context.strokeStyle = 'rgba(120, 105, 90, 0.08)';
+  for (let x = 0; x <= scene.width; x += scene.tileSize) {
+    context.beginPath();
+    context.moveTo(x, 0);
+    context.lineTo(x, scene.height);
+    context.stroke();
+  }
+  for (let y = 0; y <= scene.height; y += scene.tileSize) {
+    context.beginPath();
+    context.moveTo(0, y);
+    context.lineTo(scene.width, y);
+    context.stroke();
+  }
+
+  for (let y = 0; y < scene.height; y += scene.tileSize * 2) {
+    context.fillStyle = 'rgba(255, 255, 255, 0.12)';
+    context.fillRect(0, y, scene.width, 1);
+  }
+}
+
+function drawDecoration(context: CanvasRenderingContext2D, item: DecorationObject) {
+  const color = item.color ?? '#d9cfbf';
+  if (String(color).includes('rgba')) {
+    fillRoundedRect(context, item.x, item.y, item.w, item.h, color, 12);
+    return;
+  }
+
+  fillRoundedRect(context, item.x, item.y, item.w, item.h, color, 12);
+  strokeRoundedRect(context, item.x + 2, item.y + 2, item.w - 4, item.h - 4, 'rgba(255,255,255,0.14)', 10);
+
+  if (item.name.includes('地毯') || item.name.includes('毯')) {
+    context.strokeStyle = 'rgba(111, 85, 62, 0.16)';
+    context.lineWidth = 2;
+    context.strokeRect(item.x + 8, item.y + 8, item.w - 16, item.h - 16);
+  }
+}
+
+function drawWall(context: CanvasRenderingContext2D, item: ObstacleObject) {
+  fillRoundedRect(context, item.x, item.y, item.w, item.h, item.color ?? '#8a715e', 6);
+  context.fillStyle = 'rgba(255,255,255,0.12)';
+  context.fillRect(item.x + 2, item.y + 2, Math.max(item.w - 4, 4), 4);
+  context.fillStyle = 'rgba(71,58,45,0.12)';
+  context.fillRect(item.x, item.y + item.h - 4, item.w, 4);
+}
+
+function drawShelf(context: CanvasRenderingContext2D, item: ObstacleObject) {
+  fillRoundedRect(context, item.x, item.y, item.w, item.h, item.color ?? '#987a61', 8);
+  context.fillStyle = 'rgba(64, 48, 37, 0.14)';
+  for (let y = item.y + 12; y < item.y + item.h - 8; y += 18) {
+    context.fillRect(item.x + 4, y, item.w - 8, 3);
+  }
+  const stripePalette = ['#c8b59d', '#d9c6ae', '#7f9984', '#b68f77'];
+  let index = 0;
+  for (let x = item.x + 6; x < item.x + item.w - 8; x += 10) {
+    for (let y = item.y + 6; y < item.y + item.h - 10; y += 18) {
+      context.fillStyle = stripePalette[index % stripePalette.length] ?? '#c8b59d';
+      context.fillRect(x, y, 6, 10);
+      index += 1;
+    }
+  }
+}
+
+function drawTable(context: CanvasRenderingContext2D, item: ObstacleObject) {
+  fillRoundedRect(context, item.x, item.y, item.w, item.h, item.color ?? '#aa8a6d', 10);
+  context.fillStyle = 'rgba(255,255,255,0.14)';
+  context.fillRect(item.x + 6, item.y + 5, item.w - 12, 4);
+  context.fillStyle = 'rgba(66, 50, 39, 0.18)';
+  context.fillRect(item.x + 9, item.y + item.h - 8, 5, 8);
+  context.fillRect(item.x + item.w - 14, item.y + item.h - 8, 5, 8);
+}
+
+function drawBenchOrSofa(context: CanvasRenderingContext2D, item: ObstacleObject) {
+  fillRoundedRect(context, item.x, item.y, item.w, item.h, item.color ?? '#8f7b6f', 10);
+  context.fillStyle = 'rgba(255,255,255,0.14)';
+  context.fillRect(item.x + 6, item.y + 4, item.w - 12, 4);
+  context.fillStyle = 'rgba(66, 50, 39, 0.18)';
+  context.fillRect(item.x + 8, item.y + item.h - 6, 5, 6);
+  context.fillRect(item.x + item.w - 13, item.y + item.h - 6, 5, 6);
+}
+
+function drawSmallCabinet(context: CanvasRenderingContext2D, item: ObstacleObject) {
+  fillRoundedRect(context, item.x, item.y, item.w, item.h, item.color ?? '#928172', 8);
+  context.fillStyle = 'rgba(255,255,255,0.12)';
+  context.fillRect(item.x + 4, item.y + 4, item.w - 8, 4);
+  context.fillStyle = 'rgba(66, 50, 39, 0.16)';
+  context.fillRect(item.x + item.w / 2 - 1, item.y + 6, 2, item.h - 12);
+}
+
+function drawObstacle(context: CanvasRenderingContext2D, item: ObstacleObject) {
+  context.fillStyle = 'rgba(47, 42, 36, 0.08)';
+  fillRoundedRect(context, item.x + 3, item.y + 4, item.w, item.h, 'rgba(47, 42, 36, 0.08)', 8);
+
+  if (item.name.includes('墙')) {
+    drawWall(context, item);
+    return;
+  }
+  if (item.name.includes('书架')) {
+    drawShelf(context, item);
+    return;
+  }
+  if (item.name.includes('桌')) {
+    drawTable(context, item);
+    return;
+  }
+  if (item.name.includes('长椅') || item.name.includes('沙发')) {
+    drawBenchOrSofa(context, item);
+    return;
+  }
+  if (item.name.includes('机柜') || item.name.includes('归还车') || item.name.includes('演示机')) {
+    drawSmallCabinet(context, item);
+    return;
+  }
+  if (item.name.includes('立柱')) {
+    fillRoundedRect(context, item.x, item.y, item.w, item.h, item.color ?? '#b59e86', 999);
+    context.fillStyle = 'rgba(255,255,255,0.14)';
+    context.fillRect(item.x + 1, item.y + 3, item.w - 2, 4);
+    return;
+  }
+
+  fillRoundedRect(context, item.x, item.y, item.w, item.h, item.color ?? '#9a856f', 8);
+}
+
+function drawDoor(context: CanvasRenderingContext2D, item: InteractableObject, active: boolean) {
+  fillRoundedRect(context, item.x, item.y, item.w, item.h + 10, item.color ?? '#6f7f72', 12);
+  context.fillStyle = 'rgba(255,255,255,0.18)';
+  context.fillRect(item.x + 6, item.y + 6, item.w - 12, 5);
+  context.fillStyle = 'rgba(66, 50, 39, 0.16)';
+  context.fillRect(item.x + item.w / 2 - 2, item.y + 16, 4, item.h - 10);
+  if (active) {
+    strokeRoundedRect(context, item.x + 2, item.y + 2, item.w - 4, item.h + 6, '#ffffff', 10, 2);
+  }
+}
+
+function drawBoard(context: CanvasRenderingContext2D, item: InteractableObject, active: boolean) {
+  fillRoundedRect(context, item.x, item.y, item.w, item.h, item.color ?? '#d5c4ad', 8);
+  context.fillStyle = 'rgba(96, 72, 50, 0.2)';
+  context.fillRect(item.x + 5, item.y + 6, item.w - 10, 2);
+  context.fillRect(item.x + 5, item.y + 12, item.w - 14, 2);
+  context.fillRect(item.x + item.w / 2 - 1, item.y + item.h, 2, 8);
+  if (active) {
+    strokeRoundedRect(context, item.x - 1, item.y - 1, item.w + 2, item.h + 2, '#ffffff', 8, 2);
+  }
+}
+
+function drawInteractable(context: CanvasRenderingContext2D, item: InteractableObject, active: boolean) {
+  if (active) {
+    fillRoundedRect(context, item.x - 4, item.y - 4, item.w + 8, item.h + 8, 'rgba(255,255,255,0.16)', 12);
+  }
+
+  if (item.name.includes('门') || item.name.includes('返回大厅')) {
+    drawDoor(context, item, active);
+    return;
+  }
+
+  drawBoard(context, item, active);
+}
+
+function drawPlayer(context: CanvasRenderingContext2D, x: number, y: number, facing: 'up' | 'down' | 'left' | 'right') {
+  fillRoundedRect(context, x + 2, y + PLAYER_SIZE - 5, PLAYER_SIZE - 4, 6, 'rgba(47, 42, 36, 0.14)', 999);
+  fillRoundedRect(context, x + 4, y + 2, PLAYER_SIZE - 8, PLAYER_SIZE - 4, '#2f2a24', 10);
+  fillRoundedRect(context, x + 8, y - 1, PLAYER_SIZE - 16, 10, '#4a433a', 999);
+  context.fillStyle = '#fbf8f2';
+  const eyeX =
+    facing === 'left' ? x + 7 : facing === 'right' ? x + 14 : x + 10;
+  const eyeY = facing === 'up' ? y + 6 : y + 10;
+  context.fillRect(eyeX, eyeY, 4, 4);
 }
 
 export default function RpgCanvas() {
@@ -36,13 +272,29 @@ export default function RpgCanvas() {
 
   const scene = useMemo(() => getScene(sceneId), [sceneId]);
   const sceneMeta = SCENE_META[sceneId];
-  const playerRef = useRef(
-    createPlayer(scene.spawnPoints[spawnId]?.x ?? 80, scene.spawnPoints[spawnId]?.y ?? 80)
+  const initialSpawn = scene.spawnPoints[spawnId] ?? Object.values(scene.spawnPoints)[0] ?? { x: 80, y: 80 };
+  const safeInitialSpawn = findNearestOpenPosition(
+    initialSpawn,
+    PLAYER_SIZE,
+    scene.width,
+    scene.height,
+    scene.obstacles,
+    scene.interactables
   );
 
+  const playerRef = useRef(createPlayer(safeInitialSpawn.x, safeInitialSpawn.y));
+
   useEffect(() => {
-    const spawn = scene.spawnPoints[spawnId] ?? Object.values(scene.spawnPoints)[0];
-    playerRef.current = createPlayer(spawn.x, spawn.y);
+    const spawn = scene.spawnPoints[spawnId] ?? Object.values(scene.spawnPoints)[0] ?? { x: 80, y: 80 };
+    const safeSpawn = findNearestOpenPosition(
+      spawn,
+      PLAYER_SIZE,
+      scene.width,
+      scene.height,
+      scene.obstacles,
+      scene.interactables
+    );
+    playerRef.current = createPlayer(safeSpawn.x, safeSpawn.y);
   }, [scene, spawnId]);
 
   useEffect(() => {
@@ -148,64 +400,11 @@ export default function RpgCanvas() {
       }
 
       context.clearRect(0, 0, canvas.width, canvas.height);
-
-      context.fillStyle = TILE_COLORS[scene.baseTile] ?? '#efe6d8';
-      context.fillRect(0, 0, canvas.width, canvas.height);
-
-      context.fillStyle = 'rgba(255, 255, 255, 0.16)';
-      for (let y = 0; y < scene.height; y += scene.tileSize * 2) {
-        context.fillRect(0, y, scene.width, 1);
-      }
-
-      context.strokeStyle = 'rgba(120, 105, 90, 0.12)';
-      for (let x = 0; x <= scene.width; x += scene.tileSize) {
-        context.beginPath();
-        context.moveTo(x, 0);
-        context.lineTo(x, scene.height);
-        context.stroke();
-      }
-      for (let y = 0; y <= scene.height; y += scene.tileSize) {
-        context.beginPath();
-        context.moveTo(0, y);
-        context.lineTo(scene.width, y);
-        context.stroke();
-      }
-
-      scene.decorations.forEach((item) => {
-        context.fillStyle = item.color ?? '#d9cfbf';
-        context.fillRect(item.x, item.y, item.w, item.h);
-      });
-
-      scene.obstacles.forEach((item) => {
-        context.fillStyle = 'rgba(47, 42, 36, 0.08)';
-        context.fillRect(item.x + 3, item.y + 4, item.w, item.h);
-        context.fillStyle = item.color ?? '#9a856f';
-        context.fillRect(item.x, item.y, item.w, item.h);
-      });
-
-      scene.interactables.forEach((item) => {
-        context.fillStyle = item.color ?? '#6f7f72';
-        context.fillRect(item.x, item.y, item.w, item.h);
-
-        context.fillStyle = 'rgba(255, 255, 255, 0.22)';
-        context.fillRect(item.x + 3, item.y + 3, Math.max(item.w - 6, 4), 4);
-
-        if (nearby?.id === item.id) {
-          context.strokeStyle = '#ffffff';
-          context.lineWidth = 2;
-          context.strokeRect(item.x + 2, item.y + 2, item.w - 4, item.h - 4);
-        }
-      });
-
-      context.fillStyle = '#2f2a24';
-      context.fillRect(player.x, player.y, PLAYER_SIZE, PLAYER_SIZE);
-
-      context.fillStyle = '#fbf8f2';
-      const eyeX =
-        player.facing === 'left' ? player.x + 5 : player.facing === 'right' ? player.x + 15 : player.x + 10;
-      const eyeY = player.facing === 'up' ? player.y + 5 : player.y + 9;
-      context.fillRect(eyeX, eyeY, 4, 4);
-
+      drawBackdrop(context, scene);
+      scene.decorations.forEach((item) => drawDecoration(context, item));
+      scene.obstacles.forEach((item) => drawObstacle(context, item));
+      scene.interactables.forEach((item) => drawInteractable(context, item, nearby?.id === item.id));
+      drawPlayer(context, player.x, player.y, player.facing);
       drawSceneLabels(context, scene.name);
 
       frame = requestAnimationFrame(render);
@@ -229,6 +428,19 @@ export default function RpgCanvas() {
         </div>
 
         <aside className="scene-panel">
+          <div className="hud-card card-surface atlas-card">
+            <p className="hud-kicker">房间图谱</p>
+            <div className="atlas-grid" aria-hidden="true">
+              <div className={`atlas-node center ${sceneId === 'hall' ? 'active' : ''}`}>大厅</div>
+              <div className={`atlas-node left ${sceneId === 'library' ? 'active' : ''}`}>图书馆</div>
+              <div className={`atlas-node right ${sceneId === 'gameRoom' ? 'active' : ''}`}>游戏室</div>
+              <div className="atlas-node bottom">档案柜</div>
+              <span className="atlas-branch horizontal left" />
+              <span className="atlas-branch horizontal right" />
+              <span className="atlas-branch vertical" />
+            </div>
+          </div>
+
           <div className="hud-card card-surface">
             <p className="hud-kicker">当前房间</p>
             <h3>{scene.name}</h3>
@@ -250,6 +462,15 @@ export default function RpgCanvas() {
               ))}
             </ul>
           </div>
+
+          <div className="hud-card card-surface">
+            <p className="hud-kicker">可交互物件</p>
+            <ul>
+              {scene.interactables.map((item) => (
+                <li key={item.id}>{item.name}</li>
+              ))}
+            </ul>
+          </div>
         </aside>
       </div>
 
@@ -259,7 +480,7 @@ export default function RpgCanvas() {
         {Object.entries(SCENE_META).map(([key, meta]) => (
           <div key={key} className={`directory-card card-surface ${sceneId === key ? 'active' : ''}`}>
             <p className="hud-kicker">{meta.label}</p>
-            <strong>{key === 'hall' ? '大厅' : key === 'library' ? '图书馆' : '游戏室'}</strong>
+            <strong>{ROOM_TITLES[key as keyof typeof ROOM_TITLES]}</strong>
             <span>{meta.description}</span>
           </div>
         ))}
@@ -379,6 +600,62 @@ export default function RpgCanvas() {
           font-size: 0.76rem;
           text-transform: uppercase;
           letter-spacing: 0.08em;
+        }
+
+        .atlas-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 0.35rem;
+          align-items: center;
+          min-height: 9.2rem;
+        }
+
+        .atlas-node {
+          display: grid;
+          place-items: center;
+          min-height: 2.75rem;
+          padding: 0.35rem 0.4rem;
+          border-radius: 999px;
+          border: 1px solid var(--line);
+          background: color-mix(in srgb, var(--panel-strong) 90%, white 10%);
+          color: var(--text-muted);
+          font-size: 0.86rem;
+        }
+
+        .atlas-node.active {
+          color: var(--text);
+          border-color: color-mix(in srgb, var(--accent) 28%, var(--line) 72%);
+          background: color-mix(in srgb, var(--accent-soft) 30%, white 70%);
+          font-weight: 700;
+        }
+
+        .atlas-node.center { grid-column: 2; grid-row: 1; }
+        .atlas-node.left { grid-column: 1; grid-row: 2; }
+        .atlas-node.right { grid-column: 3; grid-row: 2; }
+        .atlas-node.bottom { grid-column: 2; grid-row: 3; }
+
+        .atlas-branch {
+          justify-self: center;
+          align-self: center;
+          display: block;
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--accent) 14%, var(--line) 86%);
+        }
+
+        .atlas-branch.horizontal {
+          width: 100%;
+          height: 2px;
+          grid-row: 2;
+        }
+
+        .atlas-branch.left { grid-column: 2; transform: translateX(-34%); }
+        .atlas-branch.right { grid-column: 2; transform: translateX(34%); }
+        .atlas-branch.vertical {
+          width: 2px;
+          height: 100%;
+          grid-column: 2;
+          grid-row: 2;
+          transform: translateY(34%);
         }
 
         .hint-bar {

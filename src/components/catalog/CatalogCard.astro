@@ -1,0 +1,127 @@
+---
+import type { CatalogNode } from '@/data/catalog/clc';
+import { withBase } from '@/utils/paths';
+
+interface Props {
+  node: CatalogNode & { count?: number; activeChildren?: (CatalogNode & { count?: number })[] };
+  compact?: boolean;
+}
+
+const { node, compact = false } = Astro.props;
+const visibleChildren = (node.activeChildren ?? node.children ?? []).slice(0, compact ? 4 : 6);
+---
+
+<article class={`catalog-card card-surface ${compact ? 'compact' : ''}`}>
+  <div class="card-top">
+    <div>
+      <p class="card-kicker">{node.level === 1 ? '一级类' : '子类'}</p>
+      <h3>{node.code}</h3>
+    </div>
+    <span class="count">{String(node.count ?? 0).padStart(2, '0')}</span>
+  </div>
+
+  <p class="card-name">{node.name}</p>
+
+  {visibleChildren.length > 0 && (
+    <ul class="child-list">
+      {visibleChildren.map((child) => (
+        <li>
+          <a href={withBase(`/catalog/${child.slug}`)}>
+            <span>{child.code}</span>
+            <span>{child.name}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )}
+
+  <a class="card-link" href={withBase(`/catalog/${node.slug}`)}>打开这架目录</a>
+</article>
+
+<style>
+  .catalog-card {
+    padding: 1rem 1.05rem;
+    display: grid;
+    gap: 0.9rem;
+    overflow: hidden;
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .card-kicker,
+  .card-name,
+  .card-link,
+  .child-list a span:first-child {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  .card-kicker {
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  h3 {
+    margin: 0.15rem 0 0;
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  .count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.15rem;
+    min-height: 2.15rem;
+    padding: 0 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent-soft) 70%, white 30%);
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line) 78%);
+    font-size: 0.82rem;
+  }
+
+  .card-name {
+    line-height: 1.65;
+  }
+
+  .child-list {
+    list-style: none;
+    display: grid;
+    gap: 0.55rem;
+    padding: 0;
+    margin: 0;
+  }
+
+  .child-list a {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.75rem;
+    padding: 0.65rem 0.7rem;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--panel-strong) 90%, white 10%);
+    border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .child-list a:hover {
+    border-color: color-mix(in srgb, var(--accent) 16%, var(--line) 84%);
+  }
+
+  .card-link {
+    justify-self: start;
+  }
+
+  .card-link:hover {
+    color: var(--text);
+  }
+
+  .compact .child-list {
+    gap: 0.45rem;
+  }
+</style>

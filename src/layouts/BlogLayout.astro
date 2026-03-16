@@ -1,6 +1,9 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PostMeta from '@/components/blog/PostMeta.astro';
+import CatalogTrail from '@/components/catalog/CatalogTrail.astro';
+import CatalogBadge from '@/components/catalog/CatalogBadge.astro';
+import { getCatalogNodeByCode } from '@/data/catalog/clc';
 import { withBase } from '@/utils/paths';
 
 interface Props {
@@ -9,9 +12,11 @@ interface Props {
   publishedAt: Date;
   updatedAt?: Date;
   tags?: string[];
+  catalogCode?: string;
 }
 
 const props = Astro.props;
+const catalogNode = getCatalogNodeByCode(props.catalogCode);
 ---
 
 <BaseLayout title={props.title} description={props.description}>
@@ -21,6 +26,17 @@ const props = Astro.props;
       <div class="stack header-content">
         <h1 class="page-title">{props.title}</h1>
         <p class="page-intro">{props.description}</p>
+
+        {catalogNode && (
+          <div class="catalog-meta stack">
+            <CatalogTrail code={catalogNode.code} />
+            <div class="catalog-badges">
+              <CatalogBadge code={catalogNode.code} mode="solid" />
+              <a href={withBase(`/catalog/${catalogNode.slug}`)} class="pill-link">打开这架目录</a>
+            </div>
+          </div>
+        )}
+
         <PostMeta publishedAt={props.publishedAt} updatedAt={props.updatedAt} tags={props.tags ?? []} />
       </div>
     </header>
@@ -34,6 +50,7 @@ const props = Astro.props;
     <nav class="article-nav" aria-label="文章后续导航">
       <a href={withBase('/blog')} class="pill-link">回到博客目录</a>
       <a href={withBase('/archive')} class="pill-link">查看归档</a>
+      <a href={withBase('/catalog')} class="pill-link">浏览馆藏目录</a>
     </nav>
   </article>
 </BaseLayout>
@@ -65,6 +82,22 @@ const props = Astro.props;
     font-size: 0.82rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+  }
+
+  .catalog-meta {
+    gap: 0.7rem;
+    padding: 0.95rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+    background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .catalog-badges {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
   }
 
   .article-body {

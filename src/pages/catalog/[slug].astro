@@ -1,0 +1,257 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PostCard from '@/components/blog/PostCard.astro';
+import CatalogBadge from '@/components/catalog/CatalogBadge.astro';
+import { flatCatalogNodes, getCatalogNodeBySlug, getCatalogPath } from '@/data/catalog/clc';
+import { getPublishedPosts } from '@/features/blog/api/posts';
+import { getCatalogNodeSummary, getPostsByCatalogCode, getSiblingCatalogNodes } from '@/features/catalog/helpers';
+import { withBase } from '@/utils/paths';
+
+export async function getStaticPaths() {
+  return flatCatalogNodes.map((node) => ({
+    params: { slug: node.slug },
+  }));
+}
+
+const node = getCatalogNodeBySlug(Astro.params.slug);
+
+if (!node) {
+  throw new Error(`Catalog node not found: ${Astro.params.slug}`);
+}
+
+const posts = await getPublishedPosts();
+const summary = getCatalogNodeSummary(node, posts);
+const relatedPosts = getPostsByCatalogCode(posts, node.code, { includeDescendants: true });
+const trail = getCatalogPath(node.code);
+const siblings = getSiblingCatalogNodes(node.code).filter((item) => item.code !== node.code);
+---
+
+<PageLayout
+  title={`${node.code} · ${node.name}`}
+  description={`馆藏目录 ${node.code} ${node.name}`}
+  intro={`这里是 ${node.code} ${node.name} 的目录页。${node.level === 1 ? '一级分区会同时收拢挂在下级子类中的文章。' : '子类页会保留它在全馆中的父级路径。'}`}
+>
+  <div class="section-toolbar">
+    <a href={withBase('/catalog')} class="pill-link">回到完整目录</a>
+    {trail[0] && trail[0].code !== node.code && (
+      <a href={withBase(`/catalog/${trail[0].slug}`)} class="pill-link">返回 {trail[0].code} 总架</a>
+    )}
+    <a href={withBase('/blog')} class="pill-link">回到博客</a>
+  </div>
+
+  <section class="node-hero card-surface">
+    <div class="node-main">
+      <p class="node-kicker">{node.level === 1 ? '一级分区' : '二级子类'}</p>
+      <h2>{node.code}</h2>
+      <p class="node-name">{node.name}</p>
+    </div>
+
+    <div class="node-side">
+      <div class="metric-card">
+        <span>入藏文章</span>
+        <strong>{String(relatedPosts.length).padStart(2, '0')}</strong>
+      </div>
+      <div class="metric-card">
+        <span>下级子类</span>
+        <strong>{String(summary.childrenWithCount.length).padStart(2, '0')}</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="meta-grid">
+    <article class="card-surface meta-card">
+      <p class="meta-kicker">路径</p>
+      <div class="trail-row">
+        {trail.map((item) => (
+          <CatalogBadge code={item.code} />
+        ))}
+      </div>
+    </article>
+
+    {siblings.length > 0 && (
+      <article class="card-surface meta-card">
+        <p class="meta-kicker">同层相邻书架</p>
+        <div class="trail-row">
+          {siblings.slice(0, 8).map((item) => (
+            <CatalogBadge code={item.code} />
+          ))}
+        </div>
+      </article>
+    )}
+  </section>
+
+  {summary.childrenWithCount.length > 0 && (
+    <section class="child-panel card-surface">
+      <div class="panel-head">
+        <p class="meta-kicker">下级子类</p>
+        <p>一级分区保留全部子类，即使当前还没有文章也不会把书架撤掉。</p>
+      </div>
+      <div class="child-grid">
+        {summary.childrenWithCount.map((child) => (
+          <a href={withBase(`/catalog/${child.slug}`)} class={`child-item ${child.count > 0 ? 'active' : ''}`}>
+            <span>{child.code}</span>
+            <strong>{child.name}</strong>
+            <em>{child.count} 篇</em>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section class="post-section">
+    <div class="section-heading">
+      <h3>本架文章</h3>
+      <p>{relatedPosts.length > 0 ? '以下文章会归入这架目录，一级分区会自动收拢其子类文章。' : '本架暂未入藏文章，但目录位置已经预留好了。'}</p>
+    </div>
+
+    {relatedPosts.length > 0 ? (
+      <div class="post-grid">
+        {relatedPosts.map((post) => <PostCard post={post} />)}
+      </div>
+    ) : (
+      <div class="empty card-surface">
+        <p>这层书架现在还是空的，但它不是缺席，只是还没被你放上第一本书。</p>
+      </div>
+    )}
+  </section>
+
+  <style>
+    .node-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(14rem, 0.8fr);
+      gap: 1rem;
+      padding: 1.25rem;
+    }
+
+    .node-main,
+    .node-side,
+    .metric-card {
+      position: relative;
+      z-index: 1;
+    }
+
+    .node-kicker,
+    .meta-kicker,
+    .section-heading p,
+    .panel-head p:last-child,
+    .empty p {
+      margin: 0;
+      color: var(--text-muted);
+    }
+
+    .node-kicker,
+    .meta-kicker {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .node-main h2 {
+      margin: 0.25rem 0 0;
+      font-size: clamp(2rem, 4vw, 2.7rem);
+      line-height: 1;
+    }
+
+    .node-name {
+      margin: 0.5rem 0 0;
+      font-size: 1.05rem;
+    }
+
+    .node-side {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .metric-card {
+      display: grid;
+      gap: 0.2rem;
+      padding: 0.9rem 0.95rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+      background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .metric-card strong {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .meta-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .meta-card,
+    .child-panel,
+    .empty {
+      padding: 1rem 1.05rem;
+    }
+
+    .trail-row {
+      display: flex;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+
+    .panel-head {
+      display: grid;
+      gap: 0.25rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .child-grid,
+    .post-grid {
+      display: grid;
+      gap: 0.9rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .child-item {
+      display: grid;
+      gap: 0.35rem;
+      padding: 0.85rem 0.9rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+      background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .child-item span,
+    .child-item em {
+      color: var(--text-muted);
+      font-style: normal;
+    }
+
+    .child-item.active {
+      border-color: color-mix(in srgb, var(--accent) 18%, var(--line) 82%);
+      background: color-mix(in srgb, var(--accent-soft) 26%, white 74%);
+    }
+
+    .post-section {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .section-heading {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .section-heading h3 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+
+    @media (max-width: 980px) {
+      .node-hero,
+      .meta-grid,
+      .child-grid,
+      .post-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</PageLayout>

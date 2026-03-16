@@ -13,7 +13,9 @@ export const libraryScene: SceneDefinition = {
     fromBlog: { x: 3 * TILE_SIZE, y: 9 * TILE_SIZE },
   },
   decorations: [
-    { id: 'reading-rug', name: '阅览地毯', type: 'decoration', x: 6 * TILE_SIZE, y: 4 * TILE_SIZE, w: 5 * TILE_SIZE, h: 3 * TILE_SIZE, color: '#d7cdb8' },
+    { id: 'reading-rug', name: '阅览地毯', type: 'decoration', x: 5.5 * TILE_SIZE, y: 3.8 * TILE_SIZE, w: 7 * TILE_SIZE, h: 3.8 * TILE_SIZE, color: '#d7cdb8' },
+    { id: 'left-lamp-glow', name: '灯影', type: 'decoration', x: 5.5 * TILE_SIZE, y: 4.2 * TILE_SIZE, w: 1.2 * TILE_SIZE, h: 1.2 * TILE_SIZE, color: 'rgba(255,255,255,0.12)' },
+    { id: 'right-lamp-glow', name: '灯影', type: 'decoration', x: 11.3 * TILE_SIZE, y: 4.2 * TILE_SIZE, w: 1.2 * TILE_SIZE, h: 1.2 * TILE_SIZE, color: 'rgba(255,255,255,0.12)' },
   ],
   obstacles: [
     { id: 'left-wall', name: '左墙', type: 'obstacle', x: 0, y: 0, w: TILE_SIZE, h: 12 * TILE_SIZE, color: '#85705f' },
@@ -22,8 +24,11 @@ export const libraryScene: SceneDefinition = {
     { id: 'bottom-left', name: '下墙左', type: 'obstacle', x: 0, y: 11 * TILE_SIZE, w: 7 * TILE_SIZE, h: TILE_SIZE, color: '#85705f' },
     { id: 'bottom-right', name: '下墙右', type: 'obstacle', x: 9 * TILE_SIZE, y: 11 * TILE_SIZE, w: 9 * TILE_SIZE, h: TILE_SIZE, color: '#85705f' },
     { id: 'shelf-left', name: '书架左', type: 'obstacle', x: 2 * TILE_SIZE, y: 2 * TILE_SIZE, w: 2 * TILE_SIZE, h: 6 * TILE_SIZE, color: '#987a61' },
+    { id: 'shelf-mid-left', name: '书架中左', type: 'obstacle', x: 5 * TILE_SIZE, y: 1.6 * TILE_SIZE, w: 1.4 * TILE_SIZE, h: 2 * TILE_SIZE, color: '#92735c' },
     { id: 'shelf-right', name: '书架右', type: 'obstacle', x: 14 * TILE_SIZE, y: 2 * TILE_SIZE, w: 2 * TILE_SIZE, h: 6 * TILE_SIZE, color: '#987a61' },
-    { id: 'table', name: '阅览桌', type: 'obstacle', x: 7 * TILE_SIZE, y: 5 * TILE_SIZE, w: 4 * TILE_SIZE, h: 2 * TILE_SIZE, color: '#aa8a6d' }
+    { id: 'shelf-mid-right', name: '书架中右', type: 'obstacle', x: 11.6 * TILE_SIZE, y: 1.6 * TILE_SIZE, w: 1.4 * TILE_SIZE, h: 2 * TILE_SIZE, color: '#92735c' },
+    { id: 'table', name: '阅览桌', type: 'obstacle', x: 7 * TILE_SIZE, y: 5 * TILE_SIZE, w: 4 * TILE_SIZE, h: 2 * TILE_SIZE, color: '#aa8a6d' },
+    { id: 'return-cart', name: '归还车', type: 'obstacle', x: 12.6 * TILE_SIZE, y: 8.1 * TILE_SIZE, w: 1.6 * TILE_SIZE, h: 1.1 * TILE_SIZE, color: '#b18f72' },
   ],
   interactables: [
     {
@@ -61,6 +66,18 @@ export const libraryScene: SceneDefinition = {
       color: '#d5c4ad',
       prompt: 'E 查看说明',
       action: { kind: 'dialog', dialogId: 'libraryShelf' }
+    },
+    {
+      id: 'reading-desk-note',
+      name: '阅览桌便签',
+      type: 'interactable',
+      x: 8.2 * TILE_SIZE,
+      y: 4.4 * TILE_SIZE,
+      w: 1.2 * TILE_SIZE,
+      h: 0.8 * TILE_SIZE,
+      color: '#d9c7b0',
+      prompt: 'E 查看阅览桌',
+      action: { kind: 'dialog', dialogId: 'libraryDesk' }
     }
   ]
 };

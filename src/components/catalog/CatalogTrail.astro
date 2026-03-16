@@ -1,0 +1,67 @@
+---
+import { getCatalogPath } from '@/data/catalog/clc';
+import { withBase } from '@/utils/paths';
+
+interface Props {
+  code?: string;
+}
+
+const { code } = Astro.props;
+const trail = getCatalogPath(code);
+---
+
+{trail.length > 0 && (
+  <nav class="catalog-trail" aria-label="馆藏路径">
+    <span class="trail-label">馆藏路径</span>
+    <ol>
+      {trail.map((node, index) => (
+        <li>
+          <a href={withBase(`/catalog/${node.slug}`)}>{node.code} {node.name}</a>
+          {index < trail.length - 1 && <span class="sep">/</span>}
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<style>
+  .catalog-trail {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .trail-label {
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  li {
+    display: inline-flex;
+    gap: 0.35rem;
+    align-items: center;
+  }
+
+  a {
+    color: var(--text-muted);
+  }
+
+  a:hover {
+    color: var(--text);
+  }
+
+  .sep {
+    color: color-mix(in srgb, var(--text-muted) 56%, white 44%);
+  }
+</style>

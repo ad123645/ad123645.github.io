@@ -4,6 +4,7 @@ export const navItems: NavItem[] = [
   { label: '首页', href: '/' },
   { label: '博客', href: '/blog' },
   { label: '游戏', href: '/games' },
+  { label: '馆藏', href: '/catalog' },
   { label: '关于', href: '/about' },
   { label: 'RPG', href: '/rpg' },
 ];

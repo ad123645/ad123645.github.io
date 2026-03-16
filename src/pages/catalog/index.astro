@@ -1,0 +1,138 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import CatalogCard from '@/components/catalog/CatalogCard.astro';
+import { getPublishedPosts } from '@/features/blog/api/posts';
+import { getCatalogSummary } from '@/features/catalog/helpers';
+import { withBase } from '@/utils/paths';
+
+const posts = await getPublishedPosts();
+const catalog = getCatalogSummary(posts);
+const activeCount = catalog.filter((node) => node.count > 0).length;
+const totalChildren = catalog.reduce((sum, node) => sum + (node.children?.length ?? 0), 0);
+const topActive = catalog.filter((node) => node.count > 0).slice(0, 6);
+---
+
+<PageLayout
+  title="馆藏目录"
+  description="完整接入一级与二级目录的馆藏索引页"
+  intro={`这里完整保留一级与二级目录。当前 ${activeCount} 个一级分区已经入藏文章，其余也先把书架立好。`}
+>
+  <div class="section-toolbar">
+    <a href={withBase('/blog')} class="pill-link">回到博客</a>
+    <a href={withBase('/archive')} class="pill-link">查看归档</a>
+    <a href={withBase('/rpg')} class="pill-link">从阅览大厅进入</a>
+  </div>
+
+  <section class="info-grid three overview-grid">
+    <article class="info-card card-surface">
+      <p class="info-kicker">一级类</p>
+      <strong>{String(catalog.length).padStart(2, '0')}</strong>
+      <p>完整保留顶层目录，作为全馆书架的骨架。</p>
+    </article>
+    <article class="info-card card-surface">
+      <p class="info-kicker">二级子类</p>
+      <strong>{String(totalChildren).padStart(3, '0')}</strong>
+      <p>把图中的二级子目录也一并接入，而不是只留几个漂亮入口。</p>
+    </article>
+    <article class="info-card card-surface">
+      <p class="info-kicker">已入藏一级分区</p>
+      <strong>{String(activeCount).padStart(2, '0')}</strong>
+      <p>当前已有文章挂载到这些书架，其余仍保留为可扩展目录。</p>
+    </article>
+  </section>
+
+  {topActive.length > 0 && (
+    <section class="active-strip card-surface">
+      <div class="strip-copy">
+        <p class="strip-kicker">当前活跃分区</p>
+        <h2>先看看最近常被翻动的几架书</h2>
+      </div>
+      <div class="strip-links">
+        {topActive.map((node) => (
+          <a href={withBase(`/catalog/${node.slug}`)}>
+            <span>{node.code}</span>
+            <span>{node.name}</span>
+            <strong>{node.count}</strong>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section class="catalog-grid">
+    {catalog.map((node) => <CatalogCard node={node} />)}
+  </section>
+
+  <style>
+    .overview-grid strong {
+      font-size: 1.75rem;
+      line-height: 1;
+    }
+
+    .overview-grid p:last-child {
+      margin: 0;
+      color: var(--text-muted);
+    }
+
+    .active-strip {
+      padding: 1.2rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .strip-copy {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .strip-kicker {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .strip-copy h2 {
+      margin: 0;
+      font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+      line-height: 1.2;
+    }
+
+    .strip-links {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.8rem;
+    }
+
+    .strip-links a {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.8rem 0.85rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+      background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .strip-links a span:first-child,
+    .strip-links a strong {
+      color: var(--text-muted);
+    }
+
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    @media (max-width: 980px) {
+      .strip-links,
+      .catalog-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</PageLayout>

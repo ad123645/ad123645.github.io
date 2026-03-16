@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { formatDate } from '@/utils/date';
 import { withBase } from '@/utils/paths';
+import CatalogBadge from '@/components/catalog/CatalogBadge.astro';
 
 interface Props {
   posts: CollectionEntry<'blog'>[];
@@ -15,7 +16,10 @@ const { posts } = Astro.props;
     posts.map((post) => (
       <li>
         <a href={withBase(`/blog/${post.id}`)}>
-          <span>{post.data.title}</span>
+          <div class="archive-main">
+            <span>{post.data.title}</span>
+            {post.data.catalogCode && <CatalogBadge code={post.data.catalogCode} />}
+          </div>
           <span>{formatDate(post.data.publishedAt)}</span>
         </a>
       </li>
@@ -40,6 +44,13 @@ const { posts } = Astro.props;
     border-radius: var(--radius-sm);
     background: var(--panel);
     border: 1px solid var(--line);
+  }
+
+  .archive-main {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
   }
 
   .archive-list a span:last-child {

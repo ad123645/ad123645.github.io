@@ -6,4 +6,5 @@ export interface PostMeta {
   tags: string[];
   draft: boolean;
   cover?: string;
+  catalogCode?: string;
 }

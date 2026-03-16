@@ -1,0 +1,60 @@
+---
+import { getCatalogNodeByCode } from '@/data/catalog/clc';
+import { withBase } from '@/utils/paths';
+
+interface Props {
+  code?: string;
+  href?: string;
+  mode?: 'solid' | 'soft';
+}
+
+const { code, href, mode = 'soft' } = Astro.props;
+const node = getCatalogNodeByCode(code);
+const url = href ?? (node ? withBase(`/catalog/${node.slug}`) : undefined);
+const label = node ? `${node.code} · ${node.name}` : code;
+---
+
+{node ? (
+  url ? (
+    <a class={`catalog-badge ${mode}`} href={url}>{label}</a>
+  ) : (
+    <span class={`catalog-badge ${mode}`}>{label}</span>
+  )
+) : null}
+
+<style>
+  .catalog-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0 0.72rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    line-height: 1;
+    letter-spacing: 0.03em;
+    border: 1px solid var(--line);
+    color: var(--text-muted);
+    transition:
+      border-color 160ms ease,
+      color 160ms ease,
+      transform 160ms ease,
+      background-color 160ms ease;
+  }
+
+  a.catalog-badge:hover {
+    transform: translateY(-1px);
+    color: var(--text);
+    border-color: color-mix(in srgb, var(--accent) 24%, var(--line) 76%);
+  }
+
+  .catalog-badge.soft {
+    background: color-mix(in srgb, var(--panel-strong) 86%, white 14%);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .catalog-badge.solid {
+    background: color-mix(in srgb, var(--accent-soft) 70%, white 30%);
+    border-color: color-mix(in srgb, var(--accent) 22%, var(--line) 78%);
+    color: var(--text);
+  }
+</style>

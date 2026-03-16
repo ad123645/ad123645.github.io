@@ -23,6 +23,7 @@ const posts = getPostsByTag(await getPublishedPosts(), tag);
   <div class="section-toolbar">
     <a href={withBase('/blog')} class="pill-link">返回博客</a>
     <a href={withBase('/archive')} class="pill-link">查看归档</a>
+    <a href={withBase('/catalog')} class="pill-link">浏览馆藏目录</a>
   </div>
 
   {posts.length > 0 ? (

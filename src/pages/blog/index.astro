@@ -1,26 +1,32 @@
 ---
 import PageLayout from '@/layouts/PageLayout.astro';
 import PostCard from '@/components/blog/PostCard.astro';
+import CatalogCard from '@/components/catalog/CatalogCard.astro';
 import { getPostTags, getPublishedPosts } from '@/features/blog/api/posts';
+import { getTopLevelCatalogNodesFromPosts } from '@/features/catalog/helpers';
+import { formatDate } from '@/utils/date';
 import { withBase } from '@/utils/paths';
 
 const posts = await getPublishedPosts();
 const tags = await getPostTags();
+const [featured, ...rest] = posts;
+const topCatalog = getTopLevelCatalogNodesFromPosts(posts).slice(0, 4);
 
 const overview = [
   { label: '文章数量', value: String(posts.length).padStart(2, '0') },
   { label: '标签数量', value: String(tags.length).padStart(2, '0') },
-  { label: '浏览方式', value: '简洁' },
+  { label: '浏览方式', value: '双轨' },
 ];
 ---
 
 <PageLayout
   title="博客"
   description="文章目录"
-  intro="这里是正常浏览入口。即使不进入 RPG 模式，也能顺畅访问全部内容。"
+  intro="这里是正常浏览入口。即使不进入 RPG 模式，也能顺畅访问全部内容，并按馆藏目录或标签寻找文章。"
 >
   <div class="section-toolbar">
     <a href={withBase('/archive')} class="pill-link">查看归档</a>
+    <a href={withBase('/catalog')} class="pill-link">浏览馆藏目录</a>
     <a href={withBase('/rpg')} class="pill-link">前往 RPG 入口</a>
   </div>
 
@@ -33,22 +39,63 @@ const overview = [
     ))}
   </div>
 
-  {tags.length > 0 && (
-    <div class="tag-cloud card-surface">
-      <div class="cloud-head">
-        <p class="cloud-title">常用标签</p>
-        <p class="cloud-note">标签页暂时还不复杂，但已经能承担目录分流。</p>
+  <section class="lead-grid">
+    {featured && (
+      <article class="card-surface featured-post">
+        <div class="featured-copy">
+          <p class="feature-kicker">最近整理</p>
+          <h2>{featured.data.title}</h2>
+          <p class="feature-desc">{featured.data.description}</p>
+        </div>
+
+        <div class="feature-meta">
+          <div>
+            <span>发布日期</span>
+            <strong>{formatDate(featured.data.publishedAt)}</strong>
+          </div>
+          <div>
+            <span>标签</span>
+            <strong>{featured.data.tags.slice(0, 2).join(' · ') || '未分类'}</strong>
+          </div>
+        </div>
+
+        <div class="feature-actions">
+          <a href={withBase(`/blog/${featured.id}`)} class="pill-link">阅读这篇文章</a>
+          <a href={withBase('/archive')} class="pill-link">查看完整归档</a>
+        </div>
+      </article>
+    )}
+
+    {tags.length > 0 && (
+      <div class="tag-cloud card-surface">
+        <div class="cloud-head">
+          <p class="cloud-title">常用标签</p>
+          <p class="cloud-note">标签像书签，馆藏目录像书架。两者现在会一起工作。</p>
+        </div>
+        <div class="cloud-links">
+          {tags.map((tag) => (
+            <a href={withBase(`/tags/${encodeURIComponent(tag)}`)}>{tag}</a>
+          ))}
+        </div>
       </div>
-      <div class="cloud-links">
-        {tags.map((tag) => (
-          <a href={withBase(`/tags/${encodeURIComponent(tag)}`)}>{tag}</a>
-        ))}
+    )}
+  </section>
+
+  {topCatalog.length > 0 && (
+    <section class="catalog-strip">
+      <div class="catalog-strip-head">
+        <p class="feature-kicker">馆藏浏览</p>
+        <h2>目录不只是一张总表，也该长进文章列表里</h2>
+        <p class="feature-desc">这些是当前最活跃的一级书架。完整总目录会保留全部一级与二级类目。</p>
       </div>
-    </div>
+      <div class="catalog-strip-grid">
+        {topCatalog.map((node) => <CatalogCard node={node} compact />)}
+      </div>
+    </section>
   )}
 
   <div class="post-grid">
-    {posts.map((post) => <PostCard post={post} />)}
+    {rest.length > 0 ? rest.map((post) => <PostCard post={post} />) : featured && <PostCard post={featured} />}
   </div>
 
   <style>
@@ -63,9 +110,92 @@ const overview = [
       line-height: 1;
     }
 
-    .tag-cloud {
-      padding: 1rem 1.1rem;
+    .lead-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.9fr);
+      gap: 1rem;
       margin-bottom: 1.25rem;
+      align-items: start;
+    }
+
+    .featured-post,
+    .tag-cloud {
+      position: relative;
+      padding: 1.15rem 1.2rem;
+    }
+
+    .featured-post > *,
+    .tag-cloud > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .featured-post {
+      display: grid;
+      gap: 1rem;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 38%),
+        color-mix(in srgb, var(--panel) 90%, white 10%);
+    }
+
+    .feature-kicker,
+    .cloud-title,
+    .cloud-note,
+    .feature-desc,
+    .feature-meta span {
+      margin: 0;
+      color: var(--text-muted);
+    }
+
+    .feature-kicker,
+    .cloud-title {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .featured-copy {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .featured-copy h2,
+    .catalog-strip-head h2 {
+      margin: 0;
+      font-size: clamp(1.45rem, 2.6vw, 2rem);
+      line-height: 1.15;
+    }
+
+    .feature-desc,
+    .cloud-note {
+      font-size: 0.95rem;
+    }
+
+    .feature-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .feature-meta div {
+      display: grid;
+      gap: 0.25rem;
+      padding: 0.85rem 0.9rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+      background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .feature-meta strong {
+      font-size: 0.98rem;
+      line-height: 1.3;
+    }
+
+    .feature-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
     }
 
     .cloud-head,
@@ -75,29 +205,9 @@ const overview = [
     }
 
     .cloud-head {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
+      display: grid;
+      gap: 0.25rem;
       margin-bottom: 0.85rem;
-    }
-
-    .cloud-title,
-    .cloud-note {
-      margin: 0;
-    }
-
-    .cloud-title {
-      color: var(--text-muted);
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .cloud-note {
-      color: var(--text-muted);
-      font-size: 0.92rem;
     }
 
     .cloud-links {
@@ -124,14 +234,34 @@ const overview = [
       border-color: color-mix(in srgb, var(--accent) 18%, var(--line) 82%);
     }
 
+    .catalog-strip {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .catalog-strip-head {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .catalog-strip-grid,
     .post-grid {
       display: grid;
       gap: 1rem;
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    @media (max-width: 760px) {
+    @media (max-width: 900px) {
+      .lead-grid,
+      .catalog-strip-grid,
       .post-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .feature-meta {
         grid-template-columns: 1fr;
       }
     }

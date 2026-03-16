@@ -1,6 +1,7 @@
 ---
 import { formatDate } from '@/utils/date';
 import { withBase } from '@/utils/paths';
+import { getCatalogPath } from '@/data/catalog/clc';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
@@ -8,22 +9,42 @@ interface Props {
 }
 
 const { post } = Astro.props;
+const catalogTrail = getCatalogPath(post.data.catalogCode);
+const topCatalog = catalogTrail[0];
+const leafCatalog = catalogTrail.at(-1);
 ---
 
 <article class="card-surface post-card">
   <a href={withBase(`/blog/${post.id}`)} class="post-link">
-    <div class="stack content">
-      <div class="post-topline">
-        <p class="date">{formatDate(post.data.publishedAt)}</p>
-        <span class="readmore">查看全文</span>
-      </div>
+    <div class="post-topline">
+      <p class="date">{formatDate(post.data.publishedAt)}</p>
+    </div>
+
+    <div class="post-main">
       <h2>{post.data.title}</h2>
       <p class="desc">{post.data.description}</p>
-      {post.data.tags.length > 0 && (
-        <ul class="tags" aria-label="标签">
-          {post.data.tags.slice(0, 3).map((tag) => <li>{tag}</li>)}
-        </ul>
+    </div>
+
+    <div class="post-meta">
+      {leafCatalog && (
+        <div class="catalog-row">
+          <span class="catalog-code">{leafCatalog.code}</span>
+          <span class="catalog-name">{leafCatalog.name}</span>
+          {topCatalog && leafCatalog.code !== topCatalog.code && (
+            <span class="catalog-parent">归在 {topCatalog.code} 架</span>
+          )}
+        </div>
       )}
+
+      <div class="post-bottomline">
+        {post.data.tags.length > 0 ? (
+          <ul class="tags" aria-label="标签">
+            {post.data.tags.slice(0, 3).map((tag) => <li>{tag}</li>)}
+          </ul>
+        ) : <span />}
+
+        <span class="readmore">查看全文</span>
+      </div>
     </div>
   </a>
 </article>
@@ -31,6 +52,7 @@ const { post } = Astro.props;
 <style>
   .post-card {
     height: 100%;
+    overflow: hidden;
     transition:
       transform 180ms ease,
       border-color 180ms ease,
@@ -38,9 +60,12 @@ const { post } = Astro.props;
   }
 
   .post-link {
-    display: block;
-    height: 100%;
-    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.95rem;
+    width: 100%;
+    min-height: 18.5rem;
+    padding: 1.15rem 1.2rem;
   }
 
   .post-card:hover {
@@ -49,36 +74,86 @@ const { post } = Astro.props;
     box-shadow: 0 16px 36px rgba(42, 36, 30, 0.1);
   }
 
-  .content {
-    height: 100%;
-    gap: 0.75rem;
-  }
-
-  .post-topline {
+  .post-topline,
+  .post-bottomline,
+  .catalog-row {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.65rem;
     align-items: center;
-    justify-content: space-between;
     flex-wrap: wrap;
   }
 
-  .post-card h2 {
-    margin: 0;
-    font-size: 1.2rem;
-    line-height: 1.25;
+  .post-topline {
+    justify-content: space-between;
+  }
+
+  .post-main {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .post-meta {
+    margin-top: auto;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .post-bottomline {
+    justify-content: space-between;
+    align-items: end;
+    gap: 0.8rem;
   }
 
   .date,
   .desc,
-  .readmore {
+  .readmore,
+  .catalog-name,
+  .catalog-parent {
     margin: 0;
     color: var(--text-muted);
   }
 
-  .readmore {
+  .date {
+    font-size: 0.95rem;
+  }
+
+  .catalog-code {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.9rem;
+    padding: 0 0.72rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+    box-shadow: var(--shadow-soft);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .catalog-name,
+  .catalog-parent {
     font-size: 0.82rem;
+  }
+
+  .post-card h2 {
+    margin: 0;
+    font-size: 1.32rem;
+    line-height: 1.22;
+    text-wrap: balance;
+  }
+
+  .desc {
+    font-size: 0.98rem;
+    line-height: 1.75;
+  }
+
+  .readmore {
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    white-space: nowrap;
   }
 
   .tags {
@@ -86,7 +161,7 @@ const { post } = Astro.props;
     display: flex;
     gap: 0.45rem;
     flex-wrap: wrap;
-    margin: 0.15rem 0 0;
+    margin: 0;
     padding: 0;
   }
 
@@ -97,5 +172,17 @@ const { post } = Astro.props;
     background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
     color: var(--text-muted);
     font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 760px) {
+    .post-link {
+      min-height: auto;
+    }
+
+    .post-bottomline {
+      align-items: start;
+      flex-direction: column;
+    }
   }
 </style>

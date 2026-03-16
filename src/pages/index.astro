@@ -6,11 +6,15 @@ import SectionTitle from '@/components/ui/SectionTitle.astro';
 import EntryCard from '@/components/site/EntryCard.astro';
 import { getPostTags, getPublishedPosts } from '@/features/blog/api/posts';
 import PostCard from '@/components/blog/PostCard.astro';
+import CatalogCard from '@/components/catalog/CatalogCard.astro';
 import { withBase } from '@/utils/paths';
+import { getCatalogSummary } from '@/features/catalog/helpers';
 
 const allPosts = await getPublishedPosts();
 const posts = allPosts.slice(0, 3);
 const tags = (await getPostTags()).slice(0, 6);
+const catalogSummary = getCatalogSummary(allPosts);
+const activeCatalog = catalogSummary.filter((node) => node.count > 0).slice(0, 4);
 
 const rooms = [
   {
@@ -56,6 +60,13 @@ const principles = [
     text: '场景对象和组件结构尽量拆开，为日后换贴图、加分类、添交互留空间。',
   },
 ];
+
+const routes = [
+  { title: '大厅', note: '沉浸式入口', href: '/rpg' },
+  { title: '图书馆', note: '文章与阅读记录', href: '/blog' },
+  { title: '游戏室', note: '实验作品与 demo', href: '/games' },
+  { title: '档案柜', note: '关于与站点说明', href: '/about' },
+];
 ---
 
 <BaseLayout title="首页">
@@ -95,19 +106,24 @@ const principles = [
           <h2>先给访客一张索引卡</h2>
         </div>
 
+        <div class="route-map" aria-hidden="true">
+          <div class="route-node hall current">大厅</div>
+          <div class="route-link left"></div>
+          <div class="route-link right"></div>
+          <div class="route-link down"></div>
+          <div class="route-node library">图书馆</div>
+          <div class="route-node game">游戏室</div>
+          <div class="route-node archive">档案柜</div>
+        </div>
+
         <ul class="catalog-list">
-          <li>
-            <strong>大厅</strong>
-            <span>沉浸式入口。今后会继续扩展可交互物件、门厅细节与贴图替换。</span>
-          </li>
-          <li>
-            <strong>图书馆</strong>
-            <span>连接博客文章与阅读记录，保持内容为主、装饰为辅。</span>
-          </li>
-          <li>
-            <strong>游戏室</strong>
-            <span>容纳实验性页面和小作品，但界面仍遵守整站视觉系统。</span>
-          </li>
+          {routes.map((route) => (
+            <li>
+              <strong>{route.title}</strong>
+              <span>{route.note}</span>
+              <a href={withBase(route.href)}>打开</a>
+            </li>
+          ))}
         </ul>
 
         <div class="tag-strip">
@@ -150,6 +166,30 @@ const principles = [
 
     <div class="entry-grid">
       {rooms.map((room) => <EntryCard {...room} />)}
+    </div>
+  </section>
+
+  <section class="shell page-block catalog-block">
+    <SectionTitle
+      eyebrow="馆藏目录"
+      title="让全量分类真正住进博客"
+      intro="一级总架和二级子类都已经接入。首页只先摆出最近常被翻动的几架书，其余目录收在完整索引页里。"
+    />
+
+    <div class="catalog-home-grid">
+      <div class="catalog-cards">
+        {activeCatalog.map((node) => <CatalogCard node={node} compact />)}
+      </div>
+
+      <aside class="card-surface catalog-side-note">
+        <p class="side-kicker">目录卡柜</p>
+        <h3>分类是书架，标签是书签</h3>
+        <p>文章现在除了标签，还会挂到完整的馆藏分类上。你可以按时间找，也可以按书架找。</p>
+        <div class="side-links">
+          <a href={withBase('/catalog')} class="pill-link">打开完整目录</a>
+          <a href={withBase('/archive')} class="pill-link">去归档页</a>
+        </div>
+      </aside>
     </div>
   </section>
 
@@ -281,6 +321,7 @@ const principles = [
     }
 
     .panel-head,
+    .route-map,
     .catalog-list,
     .tag-strip,
     .quote-box {
@@ -293,6 +334,67 @@ const principles = [
     .catalog-list li,
     .quote-box p {
       margin: 0;
+    }
+
+    .route-map {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.4rem;
+      align-items: center;
+      min-height: 10.5rem;
+      padding: 0.95rem;
+      border-radius: var(--radius-sm);
+      border: 1px dashed color-mix(in srgb, var(--line-strong) 84%, white 16%);
+      background: color-mix(in srgb, var(--panel) 88%, white 12%);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .route-node {
+      display: grid;
+      place-items: center;
+      min-height: 3rem;
+      padding: 0.35rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel-strong) 90%, white 10%);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .route-node.current {
+      color: var(--text);
+      border-color: color-mix(in srgb, var(--accent) 24%, var(--line) 76%);
+      background: color-mix(in srgb, var(--accent-soft) 44%, white 56%);
+      font-weight: 700;
+    }
+
+    .route-node.hall { grid-column: 2; grid-row: 1; }
+    .route-node.library { grid-column: 1; grid-row: 2; }
+    .route-node.game { grid-column: 3; grid-row: 2; }
+    .route-node.archive { grid-column: 2; grid-row: 3; }
+
+    .route-link {
+      justify-self: center;
+      align-self: center;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent) 14%, var(--line) 86%);
+    }
+
+    .route-link.left,
+    .route-link.right {
+      width: 100%;
+      height: 2px;
+      grid-row: 2;
+    }
+
+    .route-link.left { grid-column: 2; transform: translateX(-34%); }
+    .route-link.right { grid-column: 2; transform: translateX(34%); }
+    .route-link.down {
+      width: 2px;
+      height: 100%;
+      grid-column: 2;
+      grid-row: 2;
+      transform: translateY(34%);
     }
 
     .catalog-list {
@@ -312,9 +414,16 @@ const principles = [
       box-shadow: var(--shadow-soft);
     }
 
-    .catalog-list span {
+    .catalog-list span,
+    .catalog-list a {
       color: var(--text-muted);
       font-size: 0.92rem;
+    }
+
+    .catalog-list a {
+      color: var(--accent);
+      justify-self: start;
+      margin-top: 0.15rem;
     }
 
     .tag-strip {
@@ -358,6 +467,55 @@ const principles = [
       line-height: 1.25;
     }
 
+
+    .catalog-home-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.82fr);
+      gap: 1rem;
+    }
+
+    .catalog-cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .catalog-side-note {
+      padding: 1.2rem;
+      display: grid;
+      gap: 0.9rem;
+      align-content: start;
+    }
+
+    .catalog-side-note > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .side-kicker,
+    .catalog-side-note p {
+      margin: 0;
+      color: var(--text-muted);
+    }
+
+    .side-kicker {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .catalog-side-note h3 {
+      margin: 0;
+      font-size: 1.3rem;
+      line-height: 1.25;
+    }
+
+    .side-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
     .entry-grid,
     .recent-grid {
       display: grid;
@@ -376,7 +534,9 @@ const principles = [
     @media (max-width: 980px) {
       .hero-grid,
       .entry-grid,
-      .recent-grid {
+      .recent-grid,
+      .catalog-home-grid,
+      .catalog-cards {
         grid-template-columns: 1fr;
       }
     }
@@ -384,6 +544,10 @@ const principles = [
     @media (max-width: 760px) {
       .stat-row {
         grid-template-columns: 1fr;
+      }
+
+      .route-map {
+        min-height: 11.5rem;
       }
     }
   </style>

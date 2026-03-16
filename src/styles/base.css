@@ -102,6 +102,11 @@ main {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 36%);
 }
 
+.card-surface > * {
+  position: relative;
+  z-index: 1;
+}
+
 .muted-link {
   color: var(--text-muted);
   transition: color 160ms ease;
