@@ -10,7 +10,7 @@ import { withBase } from '@/utils/paths';
 
 const allPosts = await getPublishedPosts();
 const posts = allPosts.slice(0, 3);
-const tags = (await getPostTags()).slice(0, 5);
+const tags = (await getPostTags()).slice(0, 6);
 
 const rooms = [
   {
@@ -35,8 +35,26 @@ const rooms = [
 
 const stats = [
   { label: '已上架文章', value: String(allPosts.length).padStart(2, '0') },
-  { label: '当前房间', value: '03' },
+  { label: '开放房间', value: '03' },
   { label: '浏览模式', value: '双轨' },
+];
+
+const principles = [
+  {
+    kicker: 'Visual system',
+    title: '像同一座馆，而不是拼接楼层',
+    text: '首页、正文、游戏页都共享同一套纸面、描边、圆角与留白。',
+  },
+  {
+    kicker: 'Content first',
+    title: '先有目录，再有陈列柜',
+    text: 'RPG 是入口层，真正的长期价值仍落在文章、项目与索引结构。',
+  },
+  {
+    kicker: 'Expandable',
+    title: '现在能跑，以后能长',
+    text: '场景对象和组件结构尽量拆开，为日后换贴图、加分类、添交互留空间。',
+  },
 ];
 ---
 
@@ -65,9 +83,10 @@ const stats = [
           ))}
         </div>
 
-        <p class="soft-note">大厅支持 RPG 式浏览，旁边也保留简洁入口，不把任何访客锁在旋转门里。</p>
-
-        <ModeSwitch />
+        <div class="hero-bottom">
+          <p class="soft-note">大厅支持 RPG 式浏览，旁边也保留简洁入口，不把任何访客锁在旋转门里。</p>
+          <ModeSwitch />
+        </div>
       </div>
 
       <aside class="card-surface catalog-panel" aria-label="馆内导览">
@@ -76,10 +95,10 @@ const stats = [
           <h2>先给访客一张索引卡</h2>
         </div>
 
-        <ul>
+        <ul class="catalog-list">
           <li>
             <strong>大厅</strong>
-            <span>作为沉浸式入口，未来会继续扩展可交互物件与贴图。</span>
+            <span>沉浸式入口。今后会继续扩展可交互物件、门厅细节与贴图替换。</span>
           </li>
           <li>
             <strong>图书馆</strong>
@@ -97,8 +116,28 @@ const stats = [
           ))}
         </div>
 
-        <p class="catalog-meta">Version 0.2 · Quietly in progress</p>
+        <div class="quote-box">
+          <p>希望每个页面都像抽屉式目录的一格，打开时有纸张的温度，也有秩序感。</p>
+        </div>
       </aside>
+    </div>
+  </section>
+
+  <section class="shell page-block principles-block">
+    <SectionTitle
+      eyebrow="设计原则"
+      title="让气质、结构与功能一起调和"
+      intro="把站点的骨架、皮肤和入口方式同时收拢，避免内容系统和小游戏系统互相扯袖子。"
+    />
+
+    <div class="info-grid three">
+      {principles.map((item) => (
+        <article class="info-card card-surface principle-card">
+          <p class="info-kicker">{item.kicker}</p>
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+        </article>
+      ))}
     </div>
   </section>
 
@@ -121,7 +160,10 @@ const stats = [
         title="先把桌面上的目录卡整理好"
         intro="首页不急着解释一切，先让人看到最新的书脊和标签。"
       />
-      <a href={withBase('/archive')} class="pill-link">查看完整归档</a>
+      <div class="recent-actions">
+        <a href={withBase('/archive')} class="pill-link">查看完整归档</a>
+        <a href={withBase('/blog')} class="pill-link">进入博客目录</a>
+      </div>
     </div>
 
     <div class="recent-grid">
@@ -137,7 +179,7 @@ const stats = [
 
     .hero-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.9fr);
+      grid-template-columns: minmax(0, 1.42fr) minmax(19rem, 0.92fr);
       gap: 1rem;
       align-items: stretch;
     }
@@ -171,26 +213,23 @@ const stats = [
     }
 
     .intro,
-    .soft-note {
+    .soft-note,
+    .quote-box p,
+    .principle-card p:last-child {
       margin: 0;
       color: var(--text-muted);
-      max-width: 40rem;
     }
 
     .intro {
       font-size: 1.08rem;
+      max-width: 40rem;
     }
 
-    .soft-note {
-      padding-top: 0.25rem;
-      font-size: 0.96rem;
-    }
-
-    .actions {
+    .actions,
+    .recent-actions {
       display: flex;
       gap: 0.9rem;
       flex-wrap: wrap;
-      padding-top: 0.15rem;
     }
 
     .stat-row {
@@ -219,97 +258,111 @@ const stats = [
       font-size: 0.86rem;
     }
 
+    .hero-bottom {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .soft-note {
+      max-width: 30rem;
+      font-size: 0.96rem;
+    }
+
     .catalog-panel {
       display: grid;
-      align-content: start;
       gap: 1rem;
+      align-content: start;
       background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 42%),
-        color-mix(in srgb, var(--panel-strong) 94%, white 6%);
+        linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 32%),
+        color-mix(in srgb, var(--panel-strong) 88%, white 12%);
     }
 
     .panel-head,
-    .catalog-panel ul,
+    .catalog-list,
     .tag-strip,
-    .catalog-meta {
+    .quote-box {
       position: relative;
       z-index: 1;
     }
 
-    .catalog-panel h2,
-    .catalog-meta {
+    .panel-head h2,
+    .catalog-list,
+    .catalog-list li,
+    .quote-box p {
       margin: 0;
     }
 
-    .catalog-panel h2 {
-      font-size: clamp(1.35rem, 2.6vw, 2rem);
-      line-height: 1.15;
-    }
-
-    .catalog-panel ul {
+    .catalog-list {
       list-style: none;
-      margin: 0;
       padding: 0;
       display: grid;
-      gap: 0.9rem;
+      gap: 0.85rem;
     }
 
-    .catalog-panel li {
+    .catalog-list li {
       display: grid;
-      gap: 0.2rem;
-      padding-bottom: 0.9rem;
-      border-bottom: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+      gap: 0.18rem;
+      padding: 0.9rem 0.95rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+      background: color-mix(in srgb, var(--panel) 90%, white 10%);
+      box-shadow: var(--shadow-soft);
     }
 
-    .catalog-panel li:last-child {
-      padding-bottom: 0;
-    }
-
-    .catalog-panel strong {
-      font-size: 1rem;
-    }
-
-    .catalog-panel span,
-    .catalog-meta {
+    .catalog-list span {
       color: var(--text-muted);
+      font-size: 0.92rem;
     }
 
     .tag-strip {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.55rem;
       flex-wrap: wrap;
     }
 
     .tag-strip a {
       display: inline-flex;
       align-items: center;
-      min-height: 2rem;
-      padding: 0 0.7rem;
+      min-height: 2.1rem;
+      padding: 0 0.75rem;
       border-radius: 999px;
-      border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
-      background: color-mix(in srgb, var(--panel) 82%, white 18%);
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel) 88%, white 12%);
       color: var(--text-muted);
       font-size: 0.84rem;
     }
 
-    .catalog-meta {
-      font-size: 0.84rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+    .quote-box {
+      padding: 0.95rem 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px dashed color-mix(in srgb, var(--line-strong) 86%, white 14%);
+      background: color-mix(in srgb, var(--accent-warm) 55%, white 45%);
+    }
+
+    .principles-block {
+      padding-top: 0.5rem;
+    }
+
+    .principle-card {
+      padding: 1.05rem 1.1rem;
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .principle-card h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      line-height: 1.25;
     }
 
     .entry-grid,
     .recent-grid {
       display: grid;
-      gap: 1rem;
-    }
-
-    .entry-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .recent-block {
-      padding-top: 1.5rem;
+      gap: 1rem;
     }
 
     .recent-head {
@@ -318,17 +371,17 @@ const stats = [
       align-items: end;
       justify-content: space-between;
       flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-
-    .recent-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     @media (max-width: 980px) {
       .hero-grid,
       .entry-grid,
-      .recent-grid,
+      .recent-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
       .stat-row {
         grid-template-columns: 1fr;
       }

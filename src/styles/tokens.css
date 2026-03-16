@@ -3,6 +3,7 @@
   --bg-soft: #eee6d8;
   --panel: #fbf8f2;
   --panel-strong: #f7f1e6;
+  --panel-deep: #f1e7d8;
   --paper-tint: rgba(255, 255, 255, 0.22);
   --text: #2f2a24;
   --text-muted: #6d655a;
@@ -11,6 +12,7 @@
   --accent: #6f7f72;
   --accent-2: #85644d;
   --accent-soft: #dde4dd;
+  --accent-warm: #e8ddd0;
   --shadow: 0 10px 30px rgba(42, 36, 30, 0.08);
   --shadow-soft: 0 4px 14px rgba(42, 36, 30, 0.05);
   --radius: 18px;

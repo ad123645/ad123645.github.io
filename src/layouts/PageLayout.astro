@@ -21,8 +21,20 @@ const { title, description, intro } = Astro.props;
         </div>
       </div>
 
-      <div class="banner-note">
-        <p>这里保持简洁、连续、易查找。RPG 是前厅，正文和索引仍然是馆藏本体。</p>
+      <div class="banner-side stack">
+        <div class="banner-note">
+          <p>这里保持简洁、连续、易查找。RPG 是前厅，正文和索引仍然是馆藏本体。</p>
+        </div>
+        <div class="banner-mini-grid">
+          <div>
+            <strong>Quiet mode</strong>
+            <span>直接抵达内容</span>
+          </div>
+          <div>
+            <strong>Archive logic</strong>
+            <span>慢慢长出目录感</span>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -38,19 +50,22 @@ const { title, description, intro } = Astro.props;
 
   .page-banner {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(15rem, 0.8fr);
+    grid-template-columns: minmax(0, 1.4fr) minmax(16rem, 0.92fr);
     gap: 1rem;
     padding: 1.35rem 1.4rem;
   }
 
   .banner-copy,
-  .banner-note {
+  .banner-side,
+  .banner-note,
+  .banner-mini-grid {
     position: relative;
     z-index: 1;
   }
 
   .banner-kicker,
-  .banner-note p {
+  .banner-note p,
+  .banner-mini-grid span {
     margin: 0;
     color: var(--text-muted);
   }
@@ -61,15 +76,11 @@ const { title, description, intro } = Astro.props;
     letter-spacing: 0.1em;
   }
 
-  .banner-note {
-    display: flex;
-    align-items: end;
-    justify-content: end;
-    text-align: left;
+  .banner-side {
+    align-content: start;
   }
 
   .banner-note p {
-    max-width: 18rem;
     padding: 0.85rem 0.95rem;
     border-radius: var(--radius-sm);
     border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
@@ -77,13 +88,37 @@ const { title, description, intro } = Astro.props;
     box-shadow: var(--shadow-soft);
   }
 
+  .banner-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .banner-mini-grid div {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.8rem 0.85rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+    background: color-mix(in srgb, var(--panel) 88%, white 12%);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .banner-mini-grid strong {
+    font-size: 0.92rem;
+  }
+
+  .banner-mini-grid span {
+    font-size: 0.84rem;
+  }
+
   @media (max-width: 820px) {
     .page-banner {
       grid-template-columns: 1fr;
     }
 
-    .banner-note {
-      justify-content: start;
+    .banner-mini-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>

@@ -5,6 +5,21 @@ import { withBase } from '@/utils/paths';
 
 const entry = await getEntry('pages', 'about');
 const { Content } = await render(entry!);
+
+const principles = [
+  {
+    title: '内容先于特效',
+    text: '所有交互都服务于索引、阅读和归档，不拿装饰去盖住内容本身。',
+  },
+  {
+    title: '组件先于堆砌',
+    text: '尽量把页面、样式、场景和逻辑拆开，让未来扩展不是拆墙，而是加书架。',
+  },
+  {
+    title: '统一先于花哨',
+    text: '博客、游戏页和 RPG 前厅共享一套材质和节奏，维持整站的同一呼吸。',
+  },
+];
 ---
 
 <PageLayout title="关于" description={entry?.data.description} intro="一张简洁的馆藏卡，介绍这个站点打算长期保存什么。">
@@ -30,6 +45,18 @@ const { Content } = await render(entry!);
     </aside>
   </div>
 
+  <section class="about-principles">
+    <div class="info-grid three">
+      {principles.map((item) => (
+        <article class="info-card card-surface principle-card">
+          <p class="info-kicker">建站原则</p>
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
   <style>
     .about-grid {
       display: grid;
@@ -51,7 +78,9 @@ const { Content } = await render(entry!);
 
     .side-kicker,
     .side-note h2,
-    .side-note ul {
+    .side-note ul,
+    .principle-card h3,
+    .principle-card p:last-child {
       margin: 0;
     }
 
@@ -73,15 +102,34 @@ const { Content } = await render(entry!);
       line-height: 1.2;
     }
 
+    .side-note ul,
+    .principle-card p:last-child {
+      color: var(--text-muted);
+    }
+
     .side-note ul {
       padding-left: 1.2rem;
-      color: var(--text-muted);
     }
 
     .side-links {
       display: flex;
       gap: 0.75rem;
       flex-wrap: wrap;
+    }
+
+    .about-principles {
+      margin-top: 1.25rem;
+    }
+
+    .principle-card {
+      display: grid;
+      gap: 0.65rem;
+      padding: 1rem 1.05rem;
+    }
+
+    .principle-card h3 {
+      font-size: 1.08rem;
+      line-height: 1.25;
     }
 
     @media (max-width: 900px) {

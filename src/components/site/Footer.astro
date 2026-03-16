@@ -16,12 +16,16 @@ import { withBase } from '@/utils/paths';
           <a href={withBase('/games')} class="muted-link">游戏</a>
           <a href={withBase('/about')} class="muted-link">关于</a>
           <a href={withBase('/archive')} class="muted-link">归档</a>
+          <a href={withBase('/rpg')} class="muted-link">RPG 入口</a>
         </div>
       </div>
 
       <div class="stack footer-meta">
-        <p class="meta">Reading room · Private archive · Small games</p>
-        <p class="micro">Built with Astro · Prepared for GitHub Pages</p>
+        <div class="meta-box">
+          <p class="meta">Reading room · Private archive · Small games</p>
+          <p class="micro">Built with Astro · Prepared for GitHub Pages</p>
+        </div>
+        <p class="footer-note">愿每个页面都像抽屉里的索引卡，翻开时克制，合上后还留一点余温。</p>
       </div>
     </div>
   </div>
@@ -39,7 +43,7 @@ import { withBase } from '@/utils/paths';
 
   .footer-inner {
     display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 0.9fr);
+    grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 0.95fr);
     gap: 1rem 2rem;
     padding: 1.2rem 1rem 1.25rem;
     color: var(--text-muted);
@@ -54,7 +58,8 @@ import { withBase } from '@/utils/paths';
   .title,
   .desc,
   .meta,
-  .micro {
+  .micro,
+  .footer-note {
     margin: 0;
   }
 
@@ -74,6 +79,14 @@ import { withBase } from '@/utils/paths';
     flex-wrap: wrap;
   }
 
+  .meta-box {
+    padding: 0.9rem 0.95rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+    background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+    box-shadow: var(--shadow-soft);
+  }
+
   .meta,
   .micro {
     text-transform: uppercase;
@@ -84,6 +97,11 @@ import { withBase } from '@/utils/paths';
   .micro {
     color: var(--text-muted);
     opacity: 0.82;
+    margin-top: 0.25rem;
+  }
+
+  .footer-note {
+    max-width: 24rem;
   }
 
   @media (max-width: 760px) {

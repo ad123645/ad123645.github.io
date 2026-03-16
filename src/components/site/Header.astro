@@ -13,7 +13,10 @@ import { withBase } from '@/utils/paths';
         <span class="brand-subtitle">{siteConfig.subtitle}</span>
       </a>
 
-      <Nav />
+      <div class="header-right">
+        <p class="status-pill">Quietly in progress</p>
+        <Nav />
+      </div>
     </div>
   </div>
 </header>
@@ -64,6 +67,28 @@ import { withBase } from '@/utils/paths';
     font-size: 0.8rem;
   }
 
+  .header-right {
+    display: grid;
+    justify-items: end;
+    gap: 0.55rem;
+  }
+
+  .status-pill {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.95rem;
+    padding: 0 0.75rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, white 18%);
+    background: color-mix(in srgb, var(--panel-strong) 82%, white 18%);
+    color: var(--text-muted);
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: var(--shadow-soft);
+  }
+
   @media (max-width: 760px) {
     .site-header {
       padding-top: 0.6rem;
@@ -73,6 +98,11 @@ import { withBase } from '@/utils/paths';
       align-items: start;
       flex-direction: column;
       padding: 0.9rem;
+    }
+
+    .header-right {
+      width: 100%;
+      justify-items: start;
     }
   }
 </style>
