@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
 import BlogLayout from '@/layouts/BlogLayout.astro';
+import { getPublishedPosts, getRelatedPosts } from '@/features/blog/api/posts';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
@@ -17,6 +18,8 @@ if (!entry) {
   throw new Error(`Post not found: ${slug}`);
 }
 
+const allPosts = await getPublishedPosts();
+const relatedPosts = getRelatedPosts(allPosts, entry, 3);
 const { Content } = await render(entry);
 ---
 
@@ -27,6 +30,7 @@ const { Content } = await render(entry);
   updatedAt={entry.data.updatedAt}
   tags={entry.data.tags}
   catalogCode={entry.data.catalogCode}
+  relatedPosts={relatedPosts}
 >
   <Content />
 </BlogLayout>

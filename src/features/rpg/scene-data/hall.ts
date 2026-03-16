@@ -70,6 +70,20 @@ export const hallScene: SceneDefinition = {
       action: { kind: 'route', to: '/about' }
     },
     {
+      id: 'catalog-stand',
+      name: '总目录牌',
+      type: 'interactable',
+      x: 2.1 * TILE_SIZE,
+      y: 4.3 * TILE_SIZE,
+      w: 1.1 * TILE_SIZE,
+      h: 1.5 * TILE_SIZE,
+      color: '#d3c1aa',
+      prompt: 'E 打开馆藏目录',
+      action: { kind: 'route', to: '/catalog' },
+      hitbox: { x: 0, y: 0, w: 0, h: 0 },
+      interactbox: { x: 2 * TILE_SIZE, y: 4.2 * TILE_SIZE, w: 1.4 * TILE_SIZE, h: 1.7 * TILE_SIZE },
+    },
+    {
       id: 'notice-board',
       name: '公告牌',
       type: 'interactable',

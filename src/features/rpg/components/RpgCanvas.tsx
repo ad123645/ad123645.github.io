@@ -11,12 +11,13 @@ import { dialogs } from '@/features/rpg/ui/dialogs';
 import HintBar from '@/features/rpg/components/HintBar';
 import DialogPanel from '@/features/rpg/components/DialogPanel';
 import SceneTitle from '@/features/rpg/components/SceneTitle';
-import { SCENE_META } from '@/features/rpg/config/sceneMeta';
+import { SCENE_META, type SceneMetaKey } from '@/features/rpg/config/sceneMeta';
 import type { DecorationObject, InteractableObject, ObstacleObject, SceneDefinition } from '@/types/rpg';
 
 const ROOM_TITLES = {
   hall: '大厅',
   library: '图书馆',
+  stacks: '藏书室',
   gameRoom: '游戏室',
 } as const;
 
@@ -69,8 +70,9 @@ function strokeRoundedRect(
 }
 
 function drawSceneLabels(context: CanvasRenderingContext2D, sceneName: string) {
-  fillRoundedRect(context, 14, 14, 86, 26, 'rgba(251, 248, 242, 0.86)', 999);
-  strokeRoundedRect(context, 14, 14, 86, 26, 'rgba(137, 120, 102, 0.18)', 999, 1);
+  const labelWidth = Math.max(86, sceneName.length * 18 + 26);
+  fillRoundedRect(context, 14, 14, labelWidth, 26, 'rgba(251, 248, 242, 0.86)', 999);
+  strokeRoundedRect(context, 14, 14, labelWidth, 26, 'rgba(137, 120, 102, 0.18)', 999, 1);
   context.save();
   context.fillStyle = 'rgba(47, 42, 36, 0.82)';
   context.font = '600 12px ui-serif, serif';
@@ -161,6 +163,16 @@ function drawTable(context: CanvasRenderingContext2D, item: ObstacleObject) {
   context.fillRect(item.x + item.w - 14, item.y + item.h - 8, 5, 8);
 }
 
+function drawIndexStand(context: CanvasRenderingContext2D, item: ObstacleObject) {
+  fillRoundedRect(context, item.x, item.y, item.w, item.h, item.color ?? '#7e8d84', 10);
+  context.fillStyle = 'rgba(255,255,255,0.16)';
+  context.fillRect(item.x + 6, item.y + 5, item.w - 12, 4);
+  context.fillRect(item.x + 8, item.y + 12, item.w - 16, 3);
+  context.fillStyle = 'rgba(66, 50, 39, 0.16)';
+  context.fillRect(item.x + item.w / 2 - 1, item.y + item.h - 14, 2, 12);
+  fillRoundedRect(context, item.x + 6, item.y + item.h - 14, item.w - 12, 10, 'rgba(251, 248, 242, 0.14)', 8);
+}
+
 function drawBenchOrSofa(context: CanvasRenderingContext2D, item: ObstacleObject) {
   fillRoundedRect(context, item.x, item.y, item.w, item.h, item.color ?? '#8f7b6f', 10);
   context.fillStyle = 'rgba(255,255,255,0.14)';
@@ -179,18 +191,21 @@ function drawSmallCabinet(context: CanvasRenderingContext2D, item: ObstacleObjec
 }
 
 function drawObstacle(context: CanvasRenderingContext2D, item: ObstacleObject) {
-  context.fillStyle = 'rgba(47, 42, 36, 0.08)';
   fillRoundedRect(context, item.x + 3, item.y + 4, item.w, item.h, 'rgba(47, 42, 36, 0.08)', 8);
 
   if (item.name.includes('墙')) {
     drawWall(context, item);
     return;
   }
-  if (item.name.includes('书架')) {
+  if (item.name.includes('书架') || item.name.includes('目录柜')) {
     drawShelf(context, item);
     return;
   }
-  if (item.name.includes('桌')) {
+  if (item.name.includes('索引台')) {
+    drawIndexStand(context, item);
+    return;
+  }
+  if (item.name.includes('桌') || item.name.includes('总台')) {
     drawTable(context, item);
     return;
   }
@@ -198,7 +213,7 @@ function drawObstacle(context: CanvasRenderingContext2D, item: ObstacleObject) {
     drawBenchOrSofa(context, item);
     return;
   }
-  if (item.name.includes('机柜') || item.name.includes('归还车') || item.name.includes('演示机')) {
+  if (item.name.includes('机柜') || item.name.includes('归还车') || item.name.includes('演示机') || item.name.includes('门框')) {
     drawSmallCabinet(context, item);
     return;
   }
@@ -226,9 +241,11 @@ function drawDoor(context: CanvasRenderingContext2D, item: InteractableObject, a
 function drawBoard(context: CanvasRenderingContext2D, item: InteractableObject, active: boolean) {
   fillRoundedRect(context, item.x, item.y, item.w, item.h, item.color ?? '#d5c4ad', 8);
   context.fillStyle = 'rgba(96, 72, 50, 0.2)';
-  context.fillRect(item.x + 5, item.y + 6, item.w - 10, 2);
-  context.fillRect(item.x + 5, item.y + 12, item.w - 14, 2);
-  context.fillRect(item.x + item.w / 2 - 1, item.y + item.h, 2, 8);
+  context.fillRect(item.x + 5, item.y + 6, Math.max(item.w - 10, 4), 2);
+  if (item.h > 10) {
+    context.fillRect(item.x + 5, item.y + 12, Math.max(item.w - 14, 4), 2);
+    context.fillRect(item.x + item.w / 2 - 1, item.y + item.h, 2, 8);
+  }
   if (active) {
     strokeRoundedRect(context, item.x - 1, item.y - 1, item.w + 2, item.h + 2, '#ffffff', 8, 2);
   }
@@ -239,8 +256,17 @@ function drawInteractable(context: CanvasRenderingContext2D, item: InteractableO
     fillRoundedRect(context, item.x - 4, item.y - 4, item.w + 8, item.h + 8, 'rgba(255,255,255,0.16)', 12);
   }
 
-  if (item.name.includes('门') || item.name.includes('返回大厅')) {
+  if (item.name.includes('门') || item.name.includes('返回大厅') || item.name.includes('返回图书馆')) {
     drawDoor(context, item, active);
+    return;
+  }
+
+  if (item.name.includes('索引台')) {
+    const standLikeObstacle = { ...item, type: 'obstacle' as const };
+    drawIndexStand(context, standLikeObstacle);
+    if (active) {
+      strokeRoundedRect(context, item.x - 1, item.y - 1, item.w + 2, item.h + 2, '#ffffff', 10, 2);
+    }
     return;
   }
 
@@ -252,10 +278,41 @@ function drawPlayer(context: CanvasRenderingContext2D, x: number, y: number, fac
   fillRoundedRect(context, x + 4, y + 2, PLAYER_SIZE - 8, PLAYER_SIZE - 4, '#2f2a24', 10);
   fillRoundedRect(context, x + 8, y - 1, PLAYER_SIZE - 16, 10, '#4a433a', 999);
   context.fillStyle = '#fbf8f2';
-  const eyeX =
-    facing === 'left' ? x + 7 : facing === 'right' ? x + 14 : x + 10;
+  const eyeX = facing === 'left' ? x + 7 : facing === 'right' ? x + 14 : x + 10;
   const eyeY = facing === 'up' ? y + 6 : y + 10;
   context.fillRect(eyeX, eyeY, 4, 4);
+}
+
+function getActionDescription(item: InteractableObject | null) {
+  if (!item) return '先靠近门、牌子或书架，再按 E。';
+  switch (item.action.kind) {
+    case 'scene':
+      return '这会把你带到另一间房。';
+    case 'route':
+      return '这会直接打开对应的页面或分类。';
+    case 'dialog':
+      return '这会展开一段房间内说明。';
+    default:
+      return '这是一个可交互物件。';
+  }
+}
+
+function getActionHref(item: InteractableObject | null) {
+  if (!item || item.action.kind !== 'route') return null;
+  return withBase(item.action.to);
+}
+
+function getActionLabel(item: InteractableObject) {
+  switch (item.action.kind) {
+    case 'scene':
+      return '切换房间';
+    case 'route':
+      return '打开页面';
+    case 'dialog':
+      return '阅读说明';
+    default:
+      return '交互';
+  }
 }
 
 export default function RpgCanvas() {
@@ -263,16 +320,24 @@ export default function RpgCanvas() {
   const pressedKeysRef = useRef<Set<string>>(new Set());
   const promptRef = useRef('WASD 移动 · E 交互');
   const nearbyNameRef = useRef('');
+  const nearbyIdRef = useRef('');
 
-  const [sceneId, setSceneId] = useState<'hall' | 'library' | 'gameRoom'>('hall');
+  const [sceneId, setSceneId] = useState<SceneMetaKey>('hall');
   const [spawnId, setSpawnId] = useState('start');
   const [prompt, setPrompt] = useState('WASD 移动 · E 交互');
   const [dialogText, setDialogText] = useState('');
   const [nearbyName, setNearbyName] = useState('附近没有可交互物件');
+  const [nearbyId, setNearbyId] = useState('');
+  const [panelTab, setPanelTab] = useState<'nearby' | 'interactables'>('nearby');
 
   const scene = useMemo(() => getScene(sceneId), [sceneId]);
   const sceneMeta = SCENE_META[sceneId];
   const initialSpawn = scene.spawnPoints[spawnId] ?? Object.values(scene.spawnPoints)[0] ?? { x: 80, y: 80 };
+  const nearbyItem = useMemo(
+    () => scene.interactables.find((item) => item.id === nearbyId) ?? null,
+    [scene, nearbyId]
+  );
+
   const safeInitialSpawn = findNearestOpenPosition(
     initialSpawn,
     PLAYER_SIZE,
@@ -314,9 +379,10 @@ export default function RpgCanvas() {
         const action = interactable.action;
 
         if (action.kind === 'scene') {
-          setSceneId(action.toSceneId as 'hall' | 'library' | 'gameRoom');
+          setSceneId(action.toSceneId as SceneMetaKey);
           setSpawnId(action.spawnId ?? 'start');
           setDialogText('');
+          setPanelTab('nearby');
         } else if (action.kind === 'route') {
           window.location.href = withBase(action.to);
         } else if (action.kind === 'dialog') {
@@ -381,13 +447,10 @@ export default function RpgCanvas() {
         }
       }
 
-      const nearby = getInteractableInFront(
-        getPlayerRect(player),
-        player.facing,
-        scene.interactables
-      );
+      const nearby = getInteractableInFront(getPlayerRect(player), player.facing, scene.interactables);
       const nextPrompt = nearby?.prompt ?? 'WASD 移动 · E 交互';
       const nextNearbyName = nearby?.name ?? '附近没有可交互物件';
+      const nextNearbyId = nearby?.id ?? '';
 
       if (promptRef.current !== nextPrompt) {
         promptRef.current = nextPrompt;
@@ -397,6 +460,11 @@ export default function RpgCanvas() {
       if (nearbyNameRef.current !== nextNearbyName) {
         nearbyNameRef.current = nextNearbyName;
         setNearbyName(nextNearbyName);
+      }
+
+      if (nearbyIdRef.current !== nextNearbyId) {
+        nearbyIdRef.current = nextNearbyId;
+        setNearbyId(nextNearbyId);
       }
 
       context.clearRect(0, 0, canvas.width, canvas.height);
@@ -427,50 +495,58 @@ export default function RpgCanvas() {
           <canvas ref={canvasRef} width={scene.width} height={scene.height} className="rpg-canvas" />
         </div>
 
-        <aside className="scene-panel">
-          <div className="hud-card card-surface atlas-card">
-            <p className="hud-kicker">房间图谱</p>
-            <div className="atlas-grid" aria-hidden="true">
-              <div className={`atlas-node center ${sceneId === 'hall' ? 'active' : ''}`}>大厅</div>
-              <div className={`atlas-node left ${sceneId === 'library' ? 'active' : ''}`}>图书馆</div>
-              <div className={`atlas-node right ${sceneId === 'gameRoom' ? 'active' : ''}`}>游戏室</div>
-              <div className="atlas-node bottom">档案柜</div>
-              <span className="atlas-branch horizontal left" />
-              <span className="atlas-branch horizontal right" />
-              <span className="atlas-branch vertical" />
+        <aside className="scene-panel card-surface">
+          <div className="panel-tabs" role="tablist" aria-label="RPG 侧栏面板">
+            <button
+              type="button"
+              className={panelTab === 'nearby' ? 'active' : ''}
+              onClick={() => setPanelTab('nearby')}
+            >
+              附近物件
+            </button>
+            <button
+              type="button"
+              className={panelTab === 'interactables' ? 'active' : ''}
+              onClick={() => setPanelTab('interactables')}
+            >
+              可交互物件
+            </button>
+          </div>
+
+          {panelTab === 'nearby' ? (
+            <div className="hud-card panel-body">
+              <p className="hud-kicker">当前房间</p>
+              <h3>{scene.name}</h3>
+              <p>{sceneMeta.description}</p>
+
+              <div className="detail-block">
+                <p className="hud-kicker">附近物件</p>
+                <strong>{nearbyName}</strong>
+                <span>{prompt}</span>
+                <span>{getActionDescription(nearbyItem)}</span>
+                {nearbyItem && nearbyItem.action.kind === 'route' && (
+                  <a href={getActionHref(nearbyItem) ?? '#'} className="scene-link-inline">
+                    打开相关页面
+                  </a>
+                )}
+              </div>
             </div>
-          </div>
-
-          <div className="hud-card card-surface">
-            <p className="hud-kicker">当前房间</p>
-            <h3>{scene.name}</h3>
-            <p>{sceneMeta.description}</p>
-          </div>
-
-          <div className="hud-card card-surface">
-            <p className="hud-kicker">附近物件</p>
-            <h3>{nearbyName}</h3>
-            <p>{prompt}</p>
-          </div>
-
-          <div className="hud-card card-surface">
-            <p className="hud-kicker">房间气质</p>
-            <h3>{sceneMeta.mood}</h3>
-            <ul>
-              {sceneMeta.highlights.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="hud-card card-surface">
-            <p className="hud-kicker">可交互物件</p>
-            <ul>
-              {scene.interactables.map((item) => (
-                <li key={item.id}>{item.name}</li>
-              ))}
-            </ul>
-          </div>
+          ) : (
+            <div className="hud-card panel-body">
+              <p className="hud-kicker">可交互物件</p>
+              <ul className="interactable-list">
+                {scene.interactables.map((item) => (
+                  <li key={item.id} className={nearbyId === item.id ? 'active' : ''}>
+                    <div>
+                      <strong>{item.name}</strong>
+                      <span>{item.prompt.replace(/^E\s*/, '')}</span>
+                    </div>
+                    <em>{getActionLabel(item)}</em>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </aside>
       </div>
 
@@ -524,20 +600,19 @@ export default function RpgCanvas() {
 
         .canvas-layout {
           display: grid;
-          grid-template-columns: minmax(0, 1.15fr) minmax(17rem, 0.55fr);
+          grid-template-columns: minmax(0, 1.2fr) minmax(16rem, 0.42fr);
           gap: 1rem;
           align-items: start;
         }
 
         .canvas-stage,
-        .hud-card,
+        .scene-panel,
         .directory-card,
         .dialog-panel {
           position: relative;
         }
 
         .canvas-stage,
-        .hud-card,
         .directory-card {
           padding: 0.85rem;
         }
@@ -562,35 +637,113 @@ export default function RpgCanvas() {
 
         .scene-panel {
           display: grid;
-          gap: 0.9rem;
+          gap: 0.85rem;
+          padding: 0.85rem;
         }
 
-        .hud-card > *,
-        .directory-card > * {
-          position: relative;
-          z-index: 1;
-        }
-
-        .hud-card {
+        .panel-tabs {
           display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 0.45rem;
+        }
+
+        .panel-tabs button {
+          min-height: 2.5rem;
+          padding: 0 0.8rem;
+          border: 1px solid var(--line);
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--panel-strong) 90%, white 10%);
+          color: var(--text-muted);
+          cursor: pointer;
+        }
+
+        .panel-tabs button.active {
+          color: var(--text);
+          border-color: color-mix(in srgb, var(--accent) 28%, var(--line) 72%);
+          background: color-mix(in srgb, var(--accent-soft) 30%, white 70%);
+          font-weight: 700;
+        }
+
+        .panel-body {
+          display: grid;
+          gap: 0.75rem;
         }
 
         .hud-card h3,
         .hud-card p,
         .hud-card ul,
         .directory-card strong,
-        .directory-card span {
+        .directory-card span,
+        .detail-block strong,
+        .detail-block span {
           margin: 0;
         }
 
         .hud-card p,
-        .directory-card span {
+        .directory-card span,
+        .detail-block span {
           color: var(--text-muted);
         }
 
-        .hud-card ul {
-          padding-left: 1.2rem;
+        .detail-block {
+          display: grid;
+          gap: 0.35rem;
+          padding: 0.8rem;
+          border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+          border-radius: var(--radius-sm);
+          background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+        }
+
+        .scene-link-inline {
+          display: inline-flex;
+          align-items: center;
+          width: fit-content;
+          min-height: 2rem;
+          padding: 0 0.75rem;
+          border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line) 72%);
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--accent-soft) 28%, white 72%);
+          color: var(--text);
+          font-size: 0.82rem;
+        }
+
+        .interactable-list {
+          display: grid;
+          gap: 0.55rem;
+          padding: 0;
+          list-style: none;
+        }
+
+        .interactable-list li {
+          display: flex;
+          justify-content: space-between;
+          gap: 0.75rem;
+          align-items: start;
+          padding: 0.72rem 0.78rem;
+          border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+          border-radius: var(--radius-sm);
+          background: color-mix(in srgb, var(--panel-strong) 90%, white 10%);
+        }
+
+        .interactable-list li.active {
+          border-color: color-mix(in srgb, var(--accent) 28%, var(--line) 72%);
+          background: color-mix(in srgb, var(--accent-soft) 26%, white 74%);
+        }
+
+        .interactable-list li > div {
+          display: grid;
+          gap: 0.15rem;
+        }
+
+        .interactable-list strong,
+        .interactable-list span,
+        .interactable-list em {
+          margin: 0;
+          font-style: normal;
+        }
+
+        .interactable-list span,
+        .interactable-list em {
           color: var(--text-muted);
         }
 
@@ -600,62 +753,6 @@ export default function RpgCanvas() {
           font-size: 0.76rem;
           text-transform: uppercase;
           letter-spacing: 0.08em;
-        }
-
-        .atlas-grid {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 0.35rem;
-          align-items: center;
-          min-height: 9.2rem;
-        }
-
-        .atlas-node {
-          display: grid;
-          place-items: center;
-          min-height: 2.75rem;
-          padding: 0.35rem 0.4rem;
-          border-radius: 999px;
-          border: 1px solid var(--line);
-          background: color-mix(in srgb, var(--panel-strong) 90%, white 10%);
-          color: var(--text-muted);
-          font-size: 0.86rem;
-        }
-
-        .atlas-node.active {
-          color: var(--text);
-          border-color: color-mix(in srgb, var(--accent) 28%, var(--line) 72%);
-          background: color-mix(in srgb, var(--accent-soft) 30%, white 70%);
-          font-weight: 700;
-        }
-
-        .atlas-node.center { grid-column: 2; grid-row: 1; }
-        .atlas-node.left { grid-column: 1; grid-row: 2; }
-        .atlas-node.right { grid-column: 3; grid-row: 2; }
-        .atlas-node.bottom { grid-column: 2; grid-row: 3; }
-
-        .atlas-branch {
-          justify-self: center;
-          align-self: center;
-          display: block;
-          border-radius: 999px;
-          background: color-mix(in srgb, var(--accent) 14%, var(--line) 86%);
-        }
-
-        .atlas-branch.horizontal {
-          width: 100%;
-          height: 2px;
-          grid-row: 2;
-        }
-
-        .atlas-branch.left { grid-column: 2; transform: translateX(-34%); }
-        .atlas-branch.right { grid-column: 2; transform: translateX(34%); }
-        .atlas-branch.vertical {
-          width: 2px;
-          height: 100%;
-          grid-column: 2;
-          grid-row: 2;
-          transform: translateY(34%);
         }
 
         .hint-bar {
@@ -672,7 +769,7 @@ export default function RpgCanvas() {
 
         .scene-directory {
           display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 0.8rem;
         }
 
@@ -707,10 +804,27 @@ export default function RpgCanvas() {
           cursor: pointer;
         }
 
+        @media (min-width: 981px) {
+          .scene-panel {
+            position: sticky;
+            top: 6rem;
+          }
+        }
+
+        @media (max-width: 1180px) {
+          .scene-directory {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+
         @media (max-width: 980px) {
           .canvas-layout,
           .scene-directory {
             grid-template-columns: 1fr;
+          }
+
+          .scene-panel {
+            position: static;
           }
         }
       `}</style>

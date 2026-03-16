@@ -53,6 +53,20 @@ export const gameRoomScene: SceneDefinition = {
       action: { kind: 'route', to: '/games' }
     },
     {
+      id: 'catalog-note',
+      name: '馆藏索引牌',
+      type: 'interactable',
+      x: 2.9 * TILE_SIZE,
+      y: 2.1 * TILE_SIZE,
+      w: 0.95 * TILE_SIZE,
+      h: 1.1 * TILE_SIZE,
+      color: '#d8c5aa',
+      prompt: 'E 查看馆藏目录',
+      action: { kind: 'route', to: '/catalog' },
+      hitbox: { x: 0, y: 0, w: 0, h: 0 },
+      interactbox: { x: 2.8 * TILE_SIZE, y: 2 * TILE_SIZE, w: 1.1 * TILE_SIZE, h: 1.25 * TILE_SIZE },
+    },
+    {
       id: 'poster',
       name: '墙上海报',
       type: 'interactable',

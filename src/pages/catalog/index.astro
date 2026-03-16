@@ -1,21 +1,20 @@
 ---
 import PageLayout from '@/layouts/PageLayout.astro';
-import CatalogCard from '@/components/catalog/CatalogCard.astro';
 import { getPublishedPosts } from '@/features/blog/api/posts';
-import { getCatalogSummary } from '@/features/catalog/helpers';
+import { getCatalogWorkbenchSections } from '@/features/catalog/helpers';
 import { withBase } from '@/utils/paths';
 
 const posts = await getPublishedPosts();
-const catalog = getCatalogSummary(posts);
-const activeCount = catalog.filter((node) => node.count > 0).length;
-const totalChildren = catalog.reduce((sum, node) => sum + (node.children?.length ?? 0), 0);
-const topActive = catalog.filter((node) => node.count > 0).slice(0, 6);
+const sections = getCatalogWorkbenchSections(posts);
+const activeRoots = sections.filter((node) => node.count > 0);
+const inactiveRoots = sections.filter((node) => node.count === 0);
+const totalChildren = sections.reduce((sum, node) => sum + node.childCount, 0);
 ---
 
 <PageLayout
   title="馆藏目录"
   description="完整接入一级与二级目录的馆藏索引页"
-  intro={`这里完整保留一级与二级目录。当前 ${activeCount} 个一级分区已经入藏文章，其余也先把书架立好。`}
+  intro={`这里保留一级与二级目录的完整骨架。当前 ${activeRoots.length} 个一级分区已经挂上文章，其余仍作为完整书架保留。`}
 >
   <div class="section-toolbar">
     <a href={withBase('/blog')} class="pill-link">回到博客</a>
@@ -26,41 +25,99 @@ const topActive = catalog.filter((node) => node.count > 0).slice(0, 6);
   <section class="info-grid three overview-grid">
     <article class="info-card card-surface">
       <p class="info-kicker">一级类</p>
-      <strong>{String(catalog.length).padStart(2, '0')}</strong>
-      <p>完整保留顶层目录，作为全馆书架的骨架。</p>
+      <strong>{String(sections.length).padStart(2, '0')}</strong>
+      <p>完整保留顶层目录，作为全馆书架的总索引。</p>
     </article>
     <article class="info-card card-surface">
       <p class="info-kicker">二级子类</p>
       <strong>{String(totalChildren).padStart(3, '0')}</strong>
-      <p>把图中的二级子目录也一并接入，而不是只留几个漂亮入口。</p>
+      <p>把图中的二级目录全部接进来，不只挑几格好看的入口。</p>
     </article>
     <article class="info-card card-surface">
       <p class="info-kicker">已入藏一级分区</p>
-      <strong>{String(activeCount).padStart(2, '0')}</strong>
-      <p>当前已有文章挂载到这些书架，其余仍保留为可扩展目录。</p>
+      <strong>{String(activeRoots.length).padStart(2, '0')}</strong>
+      <p>目录是全量的，文章是慢慢长出来的，空架也仍然被保留。</p>
     </article>
   </section>
 
-  {topActive.length > 0 && (
-    <section class="active-strip card-surface">
-      <div class="strip-copy">
-        <p class="strip-kicker">当前活跃分区</p>
-        <h2>先看看最近常被翻动的几架书</h2>
+  <section class="catalog-workbench">
+    <aside class="catalog-sidebar card-surface">
+      <div class="sidebar-block">
+        <p class="sidebar-kicker">Quick index</p>
+        <h2>先从总索引找到要走的那一排</h2>
+        <p>左侧像目录柜，右侧像翻开的总表。活跃书架会先排上来，但未入藏的也不会被删除。</p>
       </div>
-      <div class="strip-links">
-        {topActive.map((node) => (
-          <a href={withBase(`/catalog/${node.slug}`)}>
-            <span>{node.code}</span>
-            <span>{node.name}</span>
-            <strong>{node.count}</strong>
-          </a>
-        ))}
-      </div>
-    </section>
-  )}
 
-  <section class="catalog-grid">
-    {catalog.map((node) => <CatalogCard node={node} />)}
+      {activeRoots.length > 0 && (
+        <div class="sidebar-block">
+          <p class="sidebar-kicker">常被翻动</p>
+          <div class="sidebar-featured">
+            {activeRoots.slice(0, 6).map((node) => (
+              <a href={`#catalog-${node.slug}`}>
+                <span>{node.code}</span>
+                <strong>{node.name}</strong>
+                <em>{node.count} 篇</em>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div class="sidebar-block">
+        <p class="sidebar-kicker">全部一级类</p>
+        <nav class="sidebar-index" aria-label="一级分类索引">
+          {sections.map((node) => (
+            <a href={`#catalog-${node.slug}`} class={node.count > 0 ? 'active' : ''}>
+              <span>{node.code}</span>
+              <span>{node.name}</span>
+              <em>{node.count}</em>
+            </a>
+          ))}
+        </nav>
+      </div>
+    </aside>
+
+    <div class="catalog-sections">
+      {sections.map((node) => (
+        <section id={`catalog-${node.slug}`} class={`catalog-section card-surface ${node.count > 0 ? 'active' : 'quiet'}`}>
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">一级分区</p>
+              <h2>{node.code}</h2>
+            </div>
+            <div class="section-metrics">
+              <span>{node.name}</span>
+              <strong>{node.count} 篇</strong>
+            </div>
+          </div>
+
+          <div class="section-meta">
+            <p>{node.activeChildCount} / {node.childCount} 个子类已有文章挂入，未入藏的类目仍完整保留。</p>
+            <a href={withBase(`/catalog/${node.slug}`)} class="pill-link">打开 {node.code} 总架</a>
+          </div>
+
+          <div class="child-grid">
+            {node.childrenWithCount.map((child) => (
+              <a href={withBase(`/catalog/${child.slug}`)} class={`child-item ${child.count > 0 ? 'active' : ''}`}>
+                <div class="child-top">
+                  <strong>{child.code}</strong>
+                  <em>{child.count} 篇</em>
+                </div>
+                <span>{child.name}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      ))}
+
+      {inactiveRoots.length > 0 && (
+        <section class="catalog-note card-surface">
+          <p class="section-kicker">Still in place</p>
+          <h2>未入藏的书架也继续保留</h2>
+          <p>它们现在安静，但目录位置已经在那里。等你未来写到它们时，不需要再重新发明秩序。</p>
+        </section>
+      )}
+    </div>
   </section>
 
   <style>
@@ -74,64 +131,213 @@ const topActive = catalog.filter((node) => node.count > 0).slice(0, 6);
       color: var(--text-muted);
     }
 
-    .active-strip {
-      padding: 1.2rem;
+    .catalog-workbench {
+      display: grid;
+      grid-template-columns: minmax(18rem, 20rem) minmax(0, 1fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .catalog-sidebar {
+      position: sticky;
+      top: calc(0.9rem + 4.75rem + 0.9rem);
+      padding: 1rem;
       display: grid;
       gap: 1rem;
     }
 
-    .strip-copy {
+    .sidebar-block {
       display: grid;
-      gap: 0.35rem;
+      gap: 0.75rem;
     }
 
-    .strip-kicker {
+    .sidebar-kicker,
+    .section-kicker,
+    .sidebar-block p:last-child,
+    .section-meta p,
+    .catalog-note p:last-child,
+    .child-item span,
+    .section-metrics span,
+    .sidebar-index em,
+    .sidebar-featured em {
       margin: 0;
       color: var(--text-muted);
-      font-size: 0.82rem;
+    }
+
+    .sidebar-kicker,
+    .section-kicker {
+      font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
 
-    .strip-copy h2 {
+    .sidebar-block h2,
+    .catalog-note h2,
+    .catalog-section h2 {
       margin: 0;
-      font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+    }
+
+    .sidebar-block h2 {
+      font-size: 1.3rem;
       line-height: 1.2;
     }
 
-    .strip-links {
+    .sidebar-featured,
+    .sidebar-index,
+    .catalog-sections {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.8rem;
+      gap: 0.7rem;
     }
 
-    .strip-links a {
+    .sidebar-featured a,
+    .sidebar-index a {
       display: grid;
       grid-template-columns: auto 1fr auto;
-      gap: 0.75rem;
+      gap: 0.7rem;
       align-items: center;
-      padding: 0.8rem 0.85rem;
+      padding: 0.75rem 0.8rem;
       border-radius: var(--radius-sm);
       border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
       background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
       box-shadow: var(--shadow-soft);
     }
 
-    .strip-links a span:first-child,
-    .strip-links a strong {
-      color: var(--text-muted);
+    .sidebar-index a.active,
+    .sidebar-featured a {
+      border-color: color-mix(in srgb, var(--accent) 18%, var(--line) 82%);
+      background: color-mix(in srgb, var(--accent-soft) 20%, white 80%);
     }
 
-    .catalog-grid {
+    .sidebar-featured strong,
+    .sidebar-index strong {
+      font-size: 0.95rem;
+      line-height: 1.3;
+    }
+
+    .sidebar-index span:first-child,
+    .sidebar-featured span:first-child {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .catalog-sections {
+      min-width: 0;
+    }
+
+    .catalog-section,
+    .catalog-note {
+      padding: 1rem 1.05rem;
+      display: grid;
+      gap: 0.9rem;
+      scroll-margin-top: calc(0.9rem + 4.75rem + 1.5rem);
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .catalog-section h2 {
+      font-size: clamp(1.55rem, 2vw, 2rem);
+      line-height: 1;
+      margin-top: 0.2rem;
+    }
+
+    .section-metrics {
+      display: grid;
+      gap: 0.25rem;
+      justify-items: end;
+      text-align: right;
+    }
+
+    .section-metrics strong {
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .section-meta {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .child-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
-    @media (max-width: 980px) {
-      .strip-links,
-      .catalog-grid {
+    .child-item {
+      display: grid;
+      gap: 0.35rem;
+      padding: 0.85rem 0.9rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+      background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+      box-shadow: var(--shadow-soft);
+      transition: border-color 160ms ease, transform 160ms ease, background-color 160ms ease;
+    }
+
+    .child-item:hover {
+      transform: translateY(-1px);
+      border-color: color-mix(in srgb, var(--accent) 16%, var(--line) 84%);
+    }
+
+    .child-item.active {
+      background: color-mix(in srgb, var(--accent-soft) 22%, white 78%);
+      border-color: color-mix(in srgb, var(--accent) 18%, var(--line) 82%);
+    }
+
+    .child-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.7rem;
+      align-items: center;
+    }
+
+    .child-top strong,
+    .catalog-note h2 {
+      font-size: 1rem;
+      line-height: 1.2;
+    }
+
+    .child-top em {
+      color: var(--text-muted);
+      font-style: normal;
+      white-space: nowrap;
+      font-size: 0.82rem;
+    }
+
+    .quiet {
+      opacity: 0.96;
+    }
+
+    @media (max-width: 1080px) {
+      .catalog-workbench {
         grid-template-columns: 1fr;
+      }
+
+      .catalog-sidebar {
+        position: static;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .child-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-head {
+        flex-direction: column;
+      }
+
+      .section-metrics {
+        justify-items: start;
+        text-align: left;
       }
     }
   </style>

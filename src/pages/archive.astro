@@ -1,13 +1,17 @@
 ---
 import PageLayout from '@/layouts/PageLayout.astro';
 import ArchiveList from '@/components/blog/ArchiveList.astro';
-import CatalogCard from '@/components/catalog/CatalogCard.astro';
-import { getPublishedPosts } from '@/features/blog/api/posts';
-import { getTopLevelCatalogNodesFromPosts } from '@/features/catalog/helpers';
+import { getPostsGroupedByTopCatalog, getPublishedPosts } from '@/features/blog/api/posts';
+import { catalogByCode } from '@/data/catalog/clc';
 import { withBase } from '@/utils/paths';
 
 const posts = await getPublishedPosts();
-const topCatalog = getTopLevelCatalogNodesFromPosts(posts).slice(0, 4);
+const groupedByShelf = [...getPostsGroupedByTopCatalog(posts).entries()]
+  .flatMap(([code, items]) => {
+    const node = catalogByCode.get(code);
+    return node ? [{ code, node, posts: items }] : [];
+  })
+  .sort((a, b) => b.posts.length - a.posts.length || a.code.localeCompare(b.code, 'zh-CN'));
 ---
 
 <PageLayout
@@ -21,39 +25,52 @@ const topCatalog = getTopLevelCatalogNodesFromPosts(posts).slice(0, 4);
   </div>
 
   <div class="archive-grid">
-    <div class="archive-panel card-surface">
+    <section class="archive-panel card-surface">
+      <div class="panel-head">
+        <p class="panel-kicker">By time</p>
+        <h2>按时间翻</h2>
+        <p>像从最新的一叠目录卡往后翻，先看到时间，再追到具体文章。</p>
+      </div>
       <ArchiveList posts={posts} />
-    </div>
+    </section>
 
-    {topCatalog.length > 0 && (
-      <aside class="catalog-panel">
-        <div class="panel-head">
-          <p class="panel-kicker">按书架看</p>
-          <h2>活跃分区</h2>
-          <p>完整目录保留全部一级与二级类，这里先摆出最近最常被翻开的几架。</p>
-        </div>
-        <div class="panel-grid">
-          {topCatalog.map((node) => <CatalogCard node={node} compact />)}
-        </div>
-      </aside>
-    )}
+    <section class="catalog-panel card-surface">
+      <div class="panel-head">
+        <p class="panel-kicker">By shelf</p>
+        <h2>按书架找</h2>
+        <p>分类是秩序骨架，标签是临时书签。这里沿着书架把文章重新排一遍。</p>
+      </div>
+
+      <div class="shelf-archive-list">
+        {groupedByShelf.map((group) => (
+          <article class="shelf-archive-item">
+            <div class="shelf-title-row">
+              <div>
+                <strong>{group.code}</strong>
+                <span>{group.node.name}</span>
+              </div>
+              <a href={withBase(`/catalog/${group.node.slug}`)} class="pill-link">打开书架</a>
+            </div>
+            <ArchiveList posts={group.posts} />
+          </article>
+        ))}
+      </div>
+    </section>
   </div>
 
   <style>
     .archive-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.9fr);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 1rem;
+      align-items: start;
     }
 
-    .archive-panel {
-      padding: 1rem 1.15rem;
-    }
-
+    .archive-panel,
     .catalog-panel {
+      padding: 1rem 1.15rem;
       display: grid;
       gap: 1rem;
-      align-content: start;
     }
 
     .panel-head {
@@ -62,7 +79,8 @@ const topCatalog = getTopLevelCatalogNodesFromPosts(posts).slice(0, 4);
     }
 
     .panel-kicker,
-    .panel-head p:last-child {
+    .panel-head p:last-child,
+    .shelf-title-row span {
       margin: 0;
       color: var(--text-muted);
     }
@@ -79,9 +97,38 @@ const topCatalog = getTopLevelCatalogNodesFromPosts(posts).slice(0, 4);
       line-height: 1.2;
     }
 
-    .panel-grid {
+    .shelf-archive-list {
       display: grid;
       gap: 1rem;
+    }
+
+    .shelf-archive-item {
+      display: grid;
+      gap: 0.75rem;
+      padding-top: 0.2rem;
+    }
+
+    .shelf-archive-item + .shelf-archive-item {
+      border-top: 1px solid color-mix(in srgb, var(--line) 78%, white 22%);
+      padding-top: 1rem;
+    }
+
+    .shelf-title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.8rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .shelf-title-row div {
+      display: grid;
+      gap: 0.15rem;
+    }
+
+    .shelf-title-row strong {
+      font-size: 1rem;
+      line-height: 1.2;
     }
 
     @media (max-width: 980px) {

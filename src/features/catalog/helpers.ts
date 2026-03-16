@@ -88,3 +88,20 @@ export function getSiblingCatalogNodes(code?: string | null) {
 export function getTopLevelCatalogCodeOfPost(post: CollectionEntry<'blog'>) {
   return getTopLevelCatalogCode(post.data.catalogCode);
 }
+
+export function getCatalogWorkbenchSections(posts: CollectionEntry<'blog'>[]) {
+  const counts = getCatalogCountMap(posts);
+
+  return catalogRoots
+    .map((root) => ({
+      ...root,
+      count: counts.get(root.code) ?? 0,
+      childCount: root.children?.length ?? 0,
+      activeChildCount: (root.children ?? []).filter((child) => (counts.get(child.code) ?? 0) > 0).length,
+      childrenWithCount: (root.children ?? []).map((child) => ({
+        ...child,
+        count: counts.get(child.code) ?? 0,
+      })),
+    }))
+    .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code, 'zh-CN'));
+}

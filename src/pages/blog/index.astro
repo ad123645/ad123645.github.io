@@ -2,20 +2,27 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import PostCard from '@/components/blog/PostCard.astro';
 import CatalogCard from '@/components/catalog/CatalogCard.astro';
-import { getPostTags, getPublishedPosts } from '@/features/blog/api/posts';
+import { getPostTags, getPostsGroupedByTopCatalog, getPublishedPosts } from '@/features/blog/api/posts';
 import { getTopLevelCatalogNodesFromPosts } from '@/features/catalog/helpers';
+import { catalogByCode } from '@/data/catalog/clc';
 import { formatDate } from '@/utils/date';
 import { withBase } from '@/utils/paths';
 
 const posts = await getPublishedPosts();
 const tags = await getPostTags();
 const [featured, ...rest] = posts;
-const topCatalog = getTopLevelCatalogNodesFromPosts(posts).slice(0, 4);
+const topCatalog = getTopLevelCatalogNodesFromPosts(posts);
+const groupedByShelf = [...getPostsGroupedByTopCatalog(posts).entries()]
+  .flatMap(([code, items]) => {
+    const node = catalogByCode.get(code);
+    return node ? [{ code, node, posts: items }] : [];
+  })
+  .sort((a, b) => b.posts.length - a.posts.length || a.code.localeCompare(b.code, 'zh-CN'));
 
 const overview = [
   { label: '文章数量', value: String(posts.length).padStart(2, '0') },
   { label: '标签数量', value: String(tags.length).padStart(2, '0') },
-  { label: '浏览方式', value: '双轨' },
+  { label: '活跃书架', value: String(topCatalog.length).padStart(2, '0') },
 ];
 ---
 
@@ -89,14 +96,58 @@ const overview = [
         <p class="feature-desc">这些是当前最活跃的一级书架。完整总目录会保留全部一级与二级类目。</p>
       </div>
       <div class="catalog-strip-grid">
-        {topCatalog.map((node) => <CatalogCard node={node} compact />)}
+        {topCatalog.slice(0, 4).map((node) => <CatalogCard node={node} compact />)}
       </div>
     </section>
   )}
 
+  <section class="shelf-browser card-surface">
+    <div class="shelf-browser-head">
+      <p class="feature-kicker">By shelf</p>
+      <h2>也可以沿着书架一排排看</h2>
+      <p class="feature-desc">这不是筛选器，而是另一种浏览节奏。先看整排，再翻单篇。</p>
+    </div>
+    <div class="shelf-jump">
+      {groupedByShelf.map((group) => (
+        <a href={`#shelf-${group.node.slug}`}>
+          <span>{group.code}</span>
+          <strong>{group.node.name}</strong>
+          <em>{group.posts.length}</em>
+        </a>
+      ))}
+    </div>
+  </section>
+
   <div class="post-grid">
     {rest.length > 0 ? rest.map((post) => <PostCard post={post} />) : featured && <PostCard post={featured} />}
   </div>
+
+  {groupedByShelf.length > 0 && (
+    <section class="shelf-sections">
+      {groupedByShelf.map((group) => (
+        <article id={`shelf-${group.node.slug}`} class="shelf-section card-surface">
+          <div class="shelf-section-head">
+            <div>
+              <p class="feature-kicker">Shelf section</p>
+              <h2>{group.code} · {group.node.name}</h2>
+            </div>
+            <a href={withBase(`/catalog/${group.node.slug}`)} class="pill-link">打开这架目录</a>
+          </div>
+          <ul class="shelf-post-list">
+            {group.posts.map((post) => (
+              <li>
+                <a href={withBase(`/blog/${post.id}`)}>
+                  <strong>{post.data.title}</strong>
+                  <p>{post.data.description}</p>
+                  <span>{formatDate(post.data.publishedAt)}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </section>
+  )}
 
   <style>
     .overview-card {
@@ -119,13 +170,17 @@ const overview = [
     }
 
     .featured-post,
-    .tag-cloud {
+    .tag-cloud,
+    .shelf-browser,
+    .shelf-section {
       position: relative;
       padding: 1.15rem 1.2rem;
     }
 
     .featured-post > *,
-    .tag-cloud > * {
+    .tag-cloud > *,
+    .shelf-browser > *,
+    .shelf-section > * {
       position: relative;
       z-index: 1;
     }
@@ -142,7 +197,9 @@ const overview = [
     .cloud-title,
     .cloud-note,
     .feature-desc,
-    .feature-meta span {
+    .feature-meta span,
+    .shelf-post-list p,
+    .shelf-post-list span {
       margin: 0;
       color: var(--text-muted);
     }
@@ -160,7 +217,9 @@ const overview = [
     }
 
     .featured-copy h2,
-    .catalog-strip-head h2 {
+    .catalog-strip-head h2,
+    .shelf-browser-head h2,
+    .shelf-section-head h2 {
       margin: 0;
       font-size: clamp(1.45rem, 2.6vw, 2rem);
       line-height: 1.15;
@@ -210,13 +269,15 @@ const overview = [
       margin-bottom: 0.85rem;
     }
 
-    .cloud-links {
+    .cloud-links,
+    .shelf-jump {
       display: flex;
       gap: 0.6rem;
       flex-wrap: wrap;
     }
 
-    .cloud-links a {
+    .cloud-links a,
+    .shelf-jump a {
       display: inline-flex;
       align-items: center;
       min-height: 2.2rem;
@@ -228,34 +289,111 @@ const overview = [
       transition: color 160ms ease, border-color 160ms ease, transform 160ms ease;
     }
 
-    .cloud-links a:hover {
+    .cloud-links a:hover,
+    .shelf-jump a:hover {
       color: var(--text);
       transform: translateY(-1px);
       border-color: color-mix(in srgb, var(--accent) 18%, var(--line) 82%);
     }
 
-    .catalog-strip {
+    .catalog-strip,
+    .shelf-sections {
       display: grid;
       gap: 1rem;
       margin-bottom: 1.25rem;
     }
 
-    .catalog-strip-head {
+    .catalog-strip-head,
+    .shelf-browser-head {
       display: grid;
       gap: 0.35rem;
     }
 
-    .catalog-strip-grid,
-    .post-grid {
+    .catalog-strip-grid {
       display: grid;
-      gap: 1rem;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
     }
 
-    @media (max-width: 900px) {
+    .shelf-browser {
+      display: grid;
+      gap: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .shelf-jump a {
+      gap: 0.55rem;
+    }
+
+    .shelf-jump span:first-child {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .shelf-jump em {
+      color: var(--text-muted);
+      font-style: normal;
+    }
+
+    .post-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .shelf-section {
+      display: grid;
+      gap: 0.9rem;
+      scroll-margin-top: 1rem;
+    }
+
+    .shelf-section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .shelf-post-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.8rem;
+    }
+
+    .shelf-post-list a {
+      display: grid;
+      gap: 0.4rem;
+      padding: 0.95rem 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+      background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .shelf-post-list strong {
+      font-size: 1rem;
+      line-height: 1.25;
+    }
+
+    .shelf-post-list p {
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    .shelf-post-list span {
+      font-size: 0.86rem;
+    }
+
+    @media (max-width: 980px) {
       .lead-grid,
       .catalog-strip-grid,
-      .post-grid {
+      .post-grid,
+      .shelf-post-list {
         grid-template-columns: 1fr;
       }
     }

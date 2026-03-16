@@ -1,0 +1,125 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate } from '@/utils/date';
+import { withBase } from '@/utils/paths';
+import CatalogBadge from '@/components/catalog/CatalogBadge.astro';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+  title?: string;
+  note?: string;
+}
+
+const {
+  posts,
+  title = '同架文章',
+  note = '从同一架书上继续往旁边翻。',
+} = Astro.props;
+---
+
+{posts.length > 0 && (
+  <section class="related-panel card-surface">
+    <div class="panel-head">
+      <p class="panel-kicker">Shelf relation</p>
+      <h2>{title}</h2>
+      <p>{note}</p>
+    </div>
+
+    <ul class="related-list">
+      {posts.map((post) => (
+        <li>
+          <a href={withBase(`/blog/${post.id}`)}>
+            <div class="related-main">
+              <h3>{post.data.title}</h3>
+              <p>{post.data.description}</p>
+              {post.data.catalogCode && <CatalogBadge code={post.data.catalogCode} />}
+            </div>
+            <span>{formatDate(post.data.publishedAt)}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .related-panel {
+    padding: 1.15rem 1.2rem;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .panel-head {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .panel-kicker,
+  .panel-head p:last-child,
+  .related-main p,
+  .related-list a > span {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  .panel-kicker {
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .panel-head h2,
+  .related-main h3 {
+    margin: 0;
+  }
+
+  .panel-head h2 {
+    font-size: 1.3rem;
+    line-height: 1.2;
+  }
+
+  .related-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .related-list a {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.85rem;
+    padding: 0.95rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+    background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .related-main {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .related-main h3 {
+    font-size: 1.05rem;
+    line-height: 1.25;
+  }
+
+  .related-main p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .related-list a > span {
+    white-space: nowrap;
+    font-size: 0.92rem;
+  }
+
+  @media (max-width: 760px) {
+    .related-list a {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

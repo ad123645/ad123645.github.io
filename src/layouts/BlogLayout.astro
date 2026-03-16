@@ -1,9 +1,12 @@
 ---
+import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PostMeta from '@/components/blog/PostMeta.astro';
+import RelatedPostList from '@/components/blog/RelatedPostList.astro';
 import CatalogTrail from '@/components/catalog/CatalogTrail.astro';
 import CatalogBadge from '@/components/catalog/CatalogBadge.astro';
 import { getCatalogNodeByCode } from '@/data/catalog/clc';
+import { getSiblingCatalogNodes } from '@/features/catalog/helpers';
 import { withBase } from '@/utils/paths';
 
 interface Props {
@@ -13,10 +16,14 @@ interface Props {
   updatedAt?: Date;
   tags?: string[];
   catalogCode?: string;
+  relatedPosts?: CollectionEntry<'blog'>[];
 }
 
 const props = Astro.props;
 const catalogNode = getCatalogNodeByCode(props.catalogCode);
+const siblingShelves = getSiblingCatalogNodes(props.catalogCode)
+  .filter((node) => node.code !== props.catalogCode)
+  .slice(0, 8);
 ---
 
 <BaseLayout title={props.title} description={props.description}>
@@ -47,10 +54,32 @@ const catalogNode = getCatalogNodeByCode(props.catalogCode);
       </div>
     </div>
 
+    {catalogNode && siblingShelves.length > 0 && (
+      <section class="shelf-neighbors card-surface">
+        <div class="neighbor-head">
+          <p class="article-kicker">Nearby shelves</p>
+          <h2>相邻书架</h2>
+          <p>这篇文章所在的位置不是孤岛，旁边几架也会慢慢长出它的邻居。</p>
+        </div>
+        <div class="neighbor-badges">
+          {siblingShelves.map((node) => <CatalogBadge code={node.code} />)}
+        </div>
+      </section>
+    )}
+
+    {props.relatedPosts && props.relatedPosts.length > 0 && (
+      <RelatedPostList
+        posts={props.relatedPosts}
+        title="同架与邻架文章"
+        note="先沿着同一架继续看，偶尔再向旁边那排挪一步。"
+      />
+    )}
+
     <nav class="article-nav" aria-label="文章后续导航">
       <a href={withBase('/blog')} class="pill-link">回到博客目录</a>
       <a href={withBase('/archive')} class="pill-link">查看归档</a>
       <a href={withBase('/catalog')} class="pill-link">浏览馆藏目录</a>
+      {catalogNode && <a href={withBase(`/catalog/${catalogNode.slug}`)} class="pill-link">回到当前书架</a>}
     </nav>
   </article>
 </BaseLayout>
@@ -62,7 +91,8 @@ const catalogNode = getCatalogNodeByCode(props.catalogCode);
   }
 
   .article-banner,
-  .article-body {
+  .article-body,
+  .shelf-neighbors {
     position: relative;
     z-index: 1;
   }
@@ -100,13 +130,49 @@ const catalogNode = getCatalogNodeByCode(props.catalogCode);
     align-items: center;
   }
 
-  .article-body {
+  .article-body,
+  .shelf-neighbors,
+  .related-panel {
     max-width: calc(var(--content-narrow) + 6rem);
+  }
+
+  .article-body {
     padding: 1.6rem;
   }
 
   .article-prose {
     max-width: var(--content-narrow);
+  }
+
+  .shelf-neighbors {
+    padding: 1.1rem 1.2rem;
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .neighbor-head {
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .neighbor-head h2,
+  .neighbor-head p {
+    margin: 0;
+  }
+
+  .neighbor-head h2 {
+    font-size: 1.3rem;
+    line-height: 1.2;
+  }
+
+  .neighbor-head p:last-child {
+    color: var(--text-muted);
+  }
+
+  .neighbor-badges {
+    display: flex;
+    gap: 0.7rem;
+    flex-wrap: wrap;
   }
 
   .article-nav {
@@ -117,7 +183,8 @@ const catalogNode = getCatalogNodeByCode(props.catalogCode);
 
   @media (max-width: 760px) {
     .article-body,
-    .article-banner {
+    .article-banner,
+    .shelf-neighbors {
       padding: 1.15rem;
     }
   }
