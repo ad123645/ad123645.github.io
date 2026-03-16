@@ -1,0 +1,9 @@
+.rpg-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.rpg-note {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}

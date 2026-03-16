@@ -1,0 +1,93 @@
+---
+import { getEntry, render } from 'astro:content';
+import PageLayout from '@/layouts/PageLayout.astro';
+import { withBase } from '@/utils/paths';
+
+const entry = await getEntry('pages', 'about');
+const { Content } = await render(entry!);
+---
+
+<PageLayout title="关于" description={entry?.data.description} intro="一张简洁的馆藏卡，介绍这个站点打算长期保存什么。">
+  <div class="about-grid">
+    <div class="card-surface prose-panel">
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+
+    <aside class="card-surface side-note">
+      <p class="side-kicker">Quick index</p>
+      <h2>这间小馆打算放什么</h2>
+      <ul>
+        <li>文章与笔记</li>
+        <li>小游戏与互动实验</li>
+        <li>阅读记录与长期项目</li>
+      </ul>
+      <div class="side-links">
+        <a href={withBase('/blog')} class="pill-link">查看博客</a>
+        <a href={withBase('/games')} class="pill-link">查看游戏页</a>
+      </div>
+    </aside>
+  </div>
+
+  <style>
+    .about-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.8fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .prose-panel,
+    .side-note {
+      padding: 1.2rem 1.25rem;
+    }
+
+    .prose-panel > .prose,
+    .side-note > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .side-kicker,
+    .side-note h2,
+    .side-note ul {
+      margin: 0;
+    }
+
+    .side-kicker {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+    }
+
+    .side-note {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .side-note h2 {
+      font-size: 1.35rem;
+      line-height: 1.2;
+    }
+
+    .side-note ul {
+      padding-left: 1.2rem;
+      color: var(--text-muted);
+    }
+
+    .side-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 900px) {
+      .about-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</PageLayout>

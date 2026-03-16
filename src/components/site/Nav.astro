@@ -1,0 +1,68 @@
+---
+import { siteConfig } from '@/data/site';
+import { withBase } from '@/utils/paths';
+
+const pathname = Astro.url.pathname;
+---
+
+<nav class="nav" aria-label="主导航">
+  {
+    siteConfig.navItems.map((item) => {
+      const href = withBase(item.href);
+      const active = pathname === href || (item.href !== '/' && pathname.startsWith(href));
+
+      return (
+        <a href={href} aria-current={active ? 'page' : undefined}>
+          {item.label}
+        </a>
+      );
+    })
+  }
+</nav>
+
+<style>
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    justify-content: flex-end;
+  }
+
+  .nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.35rem;
+    padding: 0 0.9rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    transition:
+      color 160ms ease,
+      border-color 160ms ease,
+      background-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .nav a:hover {
+    color: var(--text);
+    border-color: var(--line);
+    background: color-mix(in srgb, var(--panel) 90%, white 10%);
+  }
+
+  .nav a[aria-current='page'] {
+    color: var(--text);
+    border-color: color-mix(in srgb, var(--accent) 30%, var(--line) 70%);
+    background: color-mix(in srgb, var(--accent-soft) 70%, white 30%);
+  }
+
+  @media (max-width: 760px) {
+    .nav {
+      justify-content: flex-start;
+    }
+
+    .nav a {
+      min-height: 2.15rem;
+      padding-inline: 0.8rem;
+    }
+  }
+</style>

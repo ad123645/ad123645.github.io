@@ -1,0 +1,42 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Badge from '@/components/ui/Badge.astro';
+
+interface Props {
+  game: CollectionEntry<'games'>;
+}
+
+const { game } = Astro.props;
+---
+
+<article class="card-surface game-card">
+  <div class="stack">
+    <div class="head">
+      <h2>{game.data.title}</h2>
+      <Badge tone="accent">{game.data.status}</Badge>
+    </div>
+    <p class="desc">{game.data.description}</p>
+  </div>
+</article>
+
+<style>
+  .game-card {
+    padding: 1.2rem;
+  }
+
+  .head {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  h2,
+  .desc {
+    margin: 0;
+  }
+
+  .desc {
+    color: var(--text-muted);
+  }
+</style>

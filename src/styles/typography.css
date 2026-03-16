@@ -1,0 +1,69 @@
+.prose {
+  max-width: var(--content-narrow);
+}
+
+.prose :where(h1, h2, h3) {
+  line-height: 1.2;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose :where(h2) {
+  font-size: clamp(1.45rem, 2.8vw, 1.95rem);
+}
+
+.prose :where(h3) {
+  font-size: 1.15rem;
+}
+
+.prose :where(p, li, blockquote) {
+  color: var(--text);
+}
+
+.prose :where(p) {
+  margin: 1rem 0;
+}
+
+.prose :where(ul, ol) {
+  padding-left: 1.25rem;
+}
+
+.prose :where(a) {
+  color: var(--accent-2);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent-2) 35%, transparent 65%);
+  text-underline-offset: 0.15em;
+}
+
+.prose :where(code) {
+  padding: 0.15rem 0.35rem;
+  border-radius: 6px;
+  background: var(--panel-strong);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.prose :where(pre) {
+  overflow-x: auto;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+}
+
+.prose :where(pre code) {
+  padding: 0;
+  background: transparent;
+}
+
+.prose :where(blockquote) {
+  margin: 1.25rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--line);
+  color: var(--text-muted);
+}
+
+.prose :where(hr) {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 2rem 0;
+}

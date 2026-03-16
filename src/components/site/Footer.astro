@@ -1,0 +1,94 @@
+---
+import { withBase } from '@/utils/paths';
+---
+
+<footer class="site-footer">
+  <div class="shell footer-shell">
+    <div class="footer-inner card-surface">
+      <div class="stack footer-main">
+        <div>
+          <p class="title">这很调和</p>
+          <p class="desc">一个正在慢慢归档的个人空间，放笔记、游戏、阅读与一些低声生长的想法。</p>
+        </div>
+
+        <div class="footer-links" aria-label="页脚导航">
+          <a href={withBase('/blog')} class="muted-link">博客</a>
+          <a href={withBase('/games')} class="muted-link">游戏</a>
+          <a href={withBase('/about')} class="muted-link">关于</a>
+          <a href={withBase('/archive')} class="muted-link">归档</a>
+        </div>
+      </div>
+
+      <div class="stack footer-meta">
+        <p class="meta">Reading room · Private archive · Small games</p>
+        <p class="micro">Built with Astro · Prepared for GitHub Pages</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 4rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .footer-shell {
+    position: relative;
+  }
+
+  .footer-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 0.9fr);
+    gap: 1rem 2rem;
+    padding: 1.2rem 1rem 1.25rem;
+    color: var(--text-muted);
+  }
+
+  .footer-main,
+  .footer-meta {
+    position: relative;
+    z-index: 1;
+  }
+
+  .title,
+  .desc,
+  .meta,
+  .micro {
+    margin: 0;
+  }
+
+  .title {
+    color: var(--text);
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+
+  .desc {
+    max-width: 32rem;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+  }
+
+  .meta,
+  .micro {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+  }
+
+  .micro {
+    color: var(--text-muted);
+    opacity: 0.82;
+  }
+
+  @media (max-width: 760px) {
+    .footer-inner {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

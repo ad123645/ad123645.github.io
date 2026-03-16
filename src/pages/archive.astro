@@ -1,0 +1,28 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import ArchiveList from '@/components/blog/ArchiveList.astro';
+import { getPublishedPosts } from '@/features/blog/api/posts';
+import { withBase } from '@/utils/paths';
+
+const posts = await getPublishedPosts();
+---
+
+<PageLayout
+  title="归档"
+  description="所有文章的归档索引"
+  intro="当文章慢慢变多，这里会像抽屉式目录一样变得好用。"
+>
+  <div class="section-toolbar">
+    <a href={withBase('/blog')} class="pill-link">回到博客</a>
+  </div>
+
+  <div class="archive-panel card-surface">
+    <ArchiveList posts={posts} />
+  </div>
+
+  <style>
+    .archive-panel {
+      padding: 1rem 1.15rem;
+    }
+  </style>
+</PageLayout>

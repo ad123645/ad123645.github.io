@@ -1,0 +1,54 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PostCard from '@/components/blog/PostCard.astro';
+import { getPublishedPosts, getPostTags, getPostsByTag } from '@/features/blog/api/posts';
+import { withBase } from '@/utils/paths';
+
+export async function getStaticPaths() {
+  const tags = await getPostTags();
+  return tags.map((tag) => ({
+    params: { tag },
+  }));
+}
+
+const tag = decodeURIComponent(Astro.params.tag ?? '');
+const posts = getPostsByTag(await getPublishedPosts(), tag);
+---
+
+<PageLayout
+  title={`标签：${tag}`}
+  description={`标签 ${tag} 下的文章`}
+  intro={`这个标签下当前有 ${posts.length} 篇文章。标签页会在内容渐渐增多时，替代部分分类学焦虑。`}
+>
+  <div class="section-toolbar">
+    <a href={withBase('/blog')} class="pill-link">返回博客</a>
+    <a href={withBase('/archive')} class="pill-link">查看归档</a>
+  </div>
+
+  {posts.length > 0 ? (
+    <div class="post-grid">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+  ) : (
+    <div class="empty card-surface">这个标签页暂时还是空抽屉。</div>
+  )}
+
+  <style>
+    .post-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .empty {
+      padding: 1rem 1.1rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 760px) {
+      .post-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</PageLayout>

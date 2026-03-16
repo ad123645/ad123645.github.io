@@ -1,0 +1,27 @@
+---
+import { formatDate } from '@/utils/date';
+import TagList from '@/components/blog/TagList.astro';
+
+interface Props {
+  publishedAt: Date;
+  updatedAt?: Date;
+  tags: string[];
+}
+
+const { publishedAt, updatedAt, tags } = Astro.props;
+---
+
+<div class="stack meta">
+  <p>
+    发布于 {formatDate(publishedAt)}
+    {updatedAt && ` · 更新于 ${formatDate(updatedAt)}`}
+  </p>
+  <TagList tags={tags} />
+</div>
+
+<style>
+  .meta p {
+    margin: 0;
+    color: var(--text-muted);
+  }
+</style>

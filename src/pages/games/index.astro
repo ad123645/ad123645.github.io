@@ -1,0 +1,39 @@
+---
+import { getCollection } from 'astro:content';
+import PageLayout from '@/layouts/PageLayout.astro';
+import GameGrid from '@/components/games/GameGrid.astro';
+import { withBase } from '@/utils/paths';
+
+const games = await getCollection('games');
+---
+
+<PageLayout
+  title="游戏"
+  description="游戏与实验"
+  intro="这里放互动实验、小游戏、试作与开发记录。它们可以活泼，但不应该看起来像从另一栋楼搬来的。"
+>
+  <div class="section-toolbar">
+    <a href={withBase('/rpg')} class="pill-link">前往 RPG 入口</a>
+    <a href={withBase('/blog')} class="pill-link">回到博客区</a>
+  </div>
+
+  <div class="games-callout card-surface">
+    <p>这里会慢慢收纳 demo、原型和交互试验。它们可以有自己的玩法，但会继续共用整站的材质、色调和秩序。</p>
+  </div>
+
+  <GameGrid games={games} />
+
+  <style>
+    .games-callout {
+      padding: 1rem 1.1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .games-callout p {
+      margin: 0;
+      position: relative;
+      z-index: 1;
+      color: var(--text-muted);
+    }
+  </style>
+</PageLayout>

@@ -1,0 +1,28 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import GameCard from '@/components/games/GameCard.astro';
+
+interface Props {
+  games: CollectionEntry<'games'>[];
+}
+
+const { games } = Astro.props;
+---
+
+<div class="grid">
+  {games.map((game) => <GameCard game={game} />)}
+</div>
+
+<style>
+  .grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 760px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

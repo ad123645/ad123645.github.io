@@ -1,0 +1,78 @@
+---
+import Nav from '@/components/site/Nav.astro';
+import { siteConfig } from '@/data/site';
+import { withBase } from '@/utils/paths';
+---
+
+<header class="site-header">
+  <div class="shell header-shell">
+    <div class="header-inner card-surface">
+      <a class="brand" href={withBase('/')}>
+        <span class="brand-kicker">Personal archive</span>
+        <span class="brand-title">{siteConfig.title}</span>
+        <span class="brand-subtitle">{siteConfig.subtitle}</span>
+      </a>
+
+      <Nav />
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    padding-top: 0.9rem;
+  }
+
+  .header-shell {
+    position: relative;
+  }
+
+  .header-inner {
+    min-height: 4.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    padding: 0.8rem 1rem;
+    background: color-mix(in srgb, var(--panel) 85%, white 15%);
+    backdrop-filter: blur(12px);
+  }
+
+  .brand {
+    display: grid;
+    gap: 0.12rem;
+  }
+
+  .brand-kicker {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+
+  .brand-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .brand-subtitle {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 760px) {
+    .site-header {
+      padding-top: 0.6rem;
+    }
+
+    .header-inner {
+      align-items: start;
+      flex-direction: column;
+      padding: 0.9rem;
+    }
+  }
+</style>

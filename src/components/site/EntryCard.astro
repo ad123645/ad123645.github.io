@@ -1,0 +1,65 @@
+---
+import { withBase } from '@/utils/paths';
+
+interface Props {
+  title: string;
+  href: string;
+  description: string;
+  note?: string;
+}
+
+const { title, href, description, note } = Astro.props;
+---
+
+<a class="card-surface entry-card" href={withBase(href)}>
+  <p class="note">{note ?? 'Catalog'}</p>
+  <h3>{title}</h3>
+  <p class="desc">{description}</p>
+  <span class="more">打开目录</span>
+</a>
+
+<style>
+  .entry-card {
+    display: grid;
+    gap: 0.7rem;
+    padding: 1.25rem;
+    height: 100%;
+    transition:
+      transform 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .entry-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 16%, var(--line) 84%);
+  }
+
+  .note,
+  .desc,
+  .more,
+  h3 {
+    margin: 0;
+  }
+
+  .note {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+    line-height: 1.2;
+  }
+
+  .desc {
+    color: var(--text-muted);
+  }
+
+  .more {
+    color: var(--accent);
+    font-size: 0.92rem;
+  }
+</style>

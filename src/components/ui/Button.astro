@@ -1,0 +1,63 @@
+---
+import { withBase } from '@/utils/paths';
+
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'secondary';
+}
+
+const { href, variant = 'secondary' } = Astro.props;
+const className = `btn ${variant}`;
+---
+
+{href ? (
+  <a class={className} href={withBase(href)}>
+    <slot />
+  </a>
+) : (
+  <button class={className} type="button">
+    <slot />
+  </button>
+)}
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.95rem;
+    padding: 0 1.05rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: color-mix(in srgb, var(--panel) 88%, white 12%);
+    box-shadow: var(--shadow);
+    transition:
+      transform 160ms ease,
+      border-color 160ms ease,
+      background-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .primary {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, white 12%), var(--accent));
+    border-color: color-mix(in srgb, var(--accent) 80%, black 20%);
+    color: white;
+  }
+
+  .primary:hover {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 82%, white 18%), color-mix(in srgb, var(--accent) 92%, black 8%));
+  }
+
+  .secondary {
+    color: var(--text);
+  }
+
+  .secondary:hover {
+    border-color: color-mix(in srgb, var(--accent) 20%, var(--line) 80%);
+    background: color-mix(in srgb, var(--accent-soft) 28%, white 72%);
+  }
+</style>

@@ -1,0 +1,20 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import '@/styles/rpg.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'RPG 阅览大厅',
+  description = '一个带有图书馆气质的可移动首页。',
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="shell page-block rpg-shell">
+    <slot />
+  </section>
+</BaseLayout>

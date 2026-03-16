@@ -1,0 +1,123 @@
+---
+import RpgLayout from '@/layouts/RpgLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import RpgCanvas from '@/features/rpg/components/RpgCanvas';
+---
+
+<RpgLayout title="RPG 阅览大厅" description="WASD 移动，E 交互。">
+  <div class="rpg-grid">
+    <section class="stack">
+      <div class="stack">
+        <p class="page-kicker">Immersive entry</p>
+        <h1 class="page-title">RPG 阅览大厅</h1>
+        <p class="page-intro">
+          这是首页的沉浸式入口原型。你可以在大厅、图书馆和游戏室之间移动。
+          右侧的页面系统仍然保持统一，不会突然变成另一套宇宙。
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <Button href="/blog">去博客</Button>
+        <Button href="/games">去游戏页</Button>
+        <Button href="/about">去关于页</Button>
+      </div>
+
+      <div class="card-surface scene-note">
+        <div>
+          <p class="note-kicker">当前房间</p>
+          <h2>大厅 / 图书馆 / 游戏室</h2>
+        </div>
+        <p>这一版先使用几何占位物件。后续替换贴图时，场景文件与对象结构可以继续沿用。</p>
+      </div>
+    </section>
+
+    <aside class="card-surface control-card">
+      <p class="note-kicker">操作说明</p>
+      <ul>
+        <li>WASD 或方向键移动</li>
+        <li>E 键交互</li>
+        <li>门、告示牌、书架入口都是独立对象</li>
+      </ul>
+      <p class="control-foot">目标不是把博客伪装成游戏，而是给首页增加一层能走动的空间感。</p>
+    </aside>
+  </div>
+
+  <RpgCanvas client:load />
+
+  <p class="rpg-note">
+    操作方式：WASD / 方向键移动，E 键交互。当前版本使用几何占位物体，后续可替换成真实贴图。
+  </p>
+
+  <style>
+    .rpg-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.8fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .page-kicker,
+    .note-kicker,
+    .control-foot,
+    .scene-note p:last-child {
+      color: var(--text-muted);
+    }
+
+    .page-kicker,
+    .note-kicker {
+      margin: 0;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .scene-note,
+    .control-card {
+      padding: 1rem 1.1rem;
+    }
+
+    .scene-note > *,
+    .control-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .scene-note {
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .scene-note h2,
+    .scene-note p,
+    .control-card ul {
+      margin: 0;
+    }
+
+    .control-card {
+      display: grid;
+      gap: 1rem;
+      align-content: start;
+    }
+
+    .control-card ul {
+      padding-left: 1.2rem;
+      color: var(--text);
+    }
+
+    .control-foot,
+    .rpg-note {
+      margin: 0;
+    }
+
+    .rpg-note {
+      color: var(--text-muted);
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .rpg-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</RpgLayout>

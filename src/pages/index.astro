@@ -1,0 +1,337 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import ModeSwitch from '@/components/site/ModeSwitch.astro';
+import SectionTitle from '@/components/ui/SectionTitle.astro';
+import EntryCard from '@/components/site/EntryCard.astro';
+import { getPostTags, getPublishedPosts } from '@/features/blog/api/posts';
+import PostCard from '@/components/blog/PostCard.astro';
+import { withBase } from '@/utils/paths';
+
+const allPosts = await getPublishedPosts();
+const posts = allPosts.slice(0, 3);
+const tags = (await getPostTags()).slice(0, 5);
+
+const rooms = [
+  {
+    note: 'Reading stacks',
+    title: '博客文章',
+    href: '/blog',
+    description: '正式文章、随手笔记、阅读记录，都收在这里。',
+  },
+  {
+    note: 'Side room',
+    title: '游戏页',
+    href: '/games',
+    description: '放实验作品、游戏原型，以及和交互有关的碎片。',
+  },
+  {
+    note: 'Index cabinet',
+    title: '关于页',
+    href: '/about',
+    description: '把站点缘起、个人简介与这间小馆的说明放进档案柜。',
+  },
+];
+
+const stats = [
+  { label: '已上架文章', value: String(allPosts.length).padStart(2, '0') },
+  { label: '当前房间', value: '03' },
+  { label: '浏览模式', value: '双轨' },
+];
+---
+
+<BaseLayout title="首页">
+  <section class="shell hero page-block">
+    <div class="hero-grid">
+      <div class="hero-copy card-surface stack">
+        <p class="eyebrow">Library · Reading Room · Archive</p>
+        <h1>这很调和</h1>
+        <p class="intro">
+          一个偏向图书馆、阅览室与档案馆气质的个人博客。
+          你可以从大厅慢慢逛，也可以直接翻开目录。
+        </p>
+
+        <div class="actions">
+          <Button href="/rpg" variant="primary">进入阅览大厅</Button>
+          <Button href="/blog">直接浏览文章</Button>
+        </div>
+
+        <div class="stat-row" aria-label="站点概览">
+          {stats.map((item) => (
+            <div class="stat-chip">
+              <strong>{item.value}</strong>
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <p class="soft-note">大厅支持 RPG 式浏览，旁边也保留简洁入口，不把任何访客锁在旋转门里。</p>
+
+        <ModeSwitch />
+      </div>
+
+      <aside class="card-surface catalog-panel" aria-label="馆内导览">
+        <div class="stack panel-head">
+          <p class="panel-kicker">馆内导览</p>
+          <h2>先给访客一张索引卡</h2>
+        </div>
+
+        <ul>
+          <li>
+            <strong>大厅</strong>
+            <span>作为沉浸式入口，未来会继续扩展可交互物件与贴图。</span>
+          </li>
+          <li>
+            <strong>图书馆</strong>
+            <span>连接博客文章与阅读记录，保持内容为主、装饰为辅。</span>
+          </li>
+          <li>
+            <strong>游戏室</strong>
+            <span>容纳实验性页面和小作品，但界面仍遵守整站视觉系统。</span>
+          </li>
+        </ul>
+
+        <div class="tag-strip">
+          {tags.map((tag) => (
+            <a href={withBase(`/tags/${encodeURIComponent(tag)}`)}>{tag}</a>
+          ))}
+        </div>
+
+        <p class="catalog-meta">Version 0.2 · Quietly in progress</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="shell page-block">
+    <SectionTitle
+      eyebrow="馆藏索引"
+      title="从不同的门进入同一座馆"
+      intro="把博客、游戏、关于页都做成同一套材质与秩序，而不是互相串门的陌生楼层。"
+    />
+
+    <div class="entry-grid">
+      {rooms.map((room) => <EntryCard {...room} />)}
+    </div>
+  </section>
+
+  <section class="shell page-block recent-block">
+    <div class="recent-head">
+      <SectionTitle
+        eyebrow="最近文章"
+        title="先把桌面上的目录卡整理好"
+        intro="首页不急着解释一切，先让人看到最新的书脊和标签。"
+      />
+      <a href={withBase('/archive')} class="pill-link">查看完整归档</a>
+    </div>
+
+    <div class="recent-grid">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+  </section>
+
+  <style>
+    .hero {
+      padding-top: 2rem;
+      padding-bottom: 1rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.9fr);
+      gap: 1rem;
+      align-items: stretch;
+    }
+
+    .hero-copy,
+    .catalog-panel {
+      padding: 1.5rem;
+      min-height: 100%;
+    }
+
+    .hero-copy {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.24), transparent 38%),
+        color-mix(in srgb, var(--panel) 90%, white 10%);
+    }
+
+    .eyebrow,
+    .panel-kicker {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(3rem, 7vw, 5.4rem);
+      line-height: 0.98;
+      letter-spacing: 0.01em;
+    }
+
+    .intro,
+    .soft-note {
+      margin: 0;
+      color: var(--text-muted);
+      max-width: 40rem;
+    }
+
+    .intro {
+      font-size: 1.08rem;
+    }
+
+    .soft-note {
+      padding-top: 0.25rem;
+      font-size: 0.96rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+      padding-top: 0.15rem;
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .stat-chip {
+      display: grid;
+      gap: 0.2rem;
+      padding: 0.8rem 0.9rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+      background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .stat-chip strong {
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    .stat-chip span {
+      color: var(--text-muted);
+      font-size: 0.86rem;
+    }
+
+    .catalog-panel {
+      display: grid;
+      align-content: start;
+      gap: 1rem;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 42%),
+        color-mix(in srgb, var(--panel-strong) 94%, white 6%);
+    }
+
+    .panel-head,
+    .catalog-panel ul,
+    .tag-strip,
+    .catalog-meta {
+      position: relative;
+      z-index: 1;
+    }
+
+    .catalog-panel h2,
+    .catalog-meta {
+      margin: 0;
+    }
+
+    .catalog-panel h2 {
+      font-size: clamp(1.35rem, 2.6vw, 2rem);
+      line-height: 1.15;
+    }
+
+    .catalog-panel ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    .catalog-panel li {
+      display: grid;
+      gap: 0.2rem;
+      padding-bottom: 0.9rem;
+      border-bottom: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+    }
+
+    .catalog-panel li:last-child {
+      padding-bottom: 0;
+    }
+
+    .catalog-panel strong {
+      font-size: 1rem;
+    }
+
+    .catalog-panel span,
+    .catalog-meta {
+      color: var(--text-muted);
+    }
+
+    .tag-strip {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tag-strip a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2rem;
+      padding: 0 0.7rem;
+      border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+      background: color-mix(in srgb, var(--panel) 82%, white 18%);
+      color: var(--text-muted);
+      font-size: 0.84rem;
+    }
+
+    .catalog-meta {
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .entry-grid,
+    .recent-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .entry-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .recent-block {
+      padding-top: 1.5rem;
+    }
+
+    .recent-head {
+      display: flex;
+      gap: 1rem;
+      align-items: end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .recent-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid,
+      .entry-grid,
+      .recent-grid,
+      .stat-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</BaseLayout>

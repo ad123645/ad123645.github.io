@@ -1,0 +1,91 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PostMeta from '@/components/blog/PostMeta.astro';
+import { withBase } from '@/utils/paths';
+
+interface Props {
+  title: string;
+  description: string;
+  publishedAt: Date;
+  updatedAt?: Date;
+  tags?: string[];
+}
+
+const props = Astro.props;
+---
+
+<BaseLayout title={props.title} description={props.description}>
+  <article class="shell page-block article-shell">
+    <header class="article-banner card-surface stack">
+      <p class="article-kicker">Reading note</p>
+      <div class="stack header-content">
+        <h1 class="page-title">{props.title}</h1>
+        <p class="page-intro">{props.description}</p>
+        <PostMeta publishedAt={props.publishedAt} updatedAt={props.updatedAt} tags={props.tags ?? []} />
+      </div>
+    </header>
+
+    <div class="article-body card-surface">
+      <div class="prose article-prose">
+        <slot />
+      </div>
+    </div>
+
+    <nav class="article-nav" aria-label="文章后续导航">
+      <a href={withBase('/blog')} class="pill-link">回到博客目录</a>
+      <a href={withBase('/archive')} class="pill-link">查看归档</a>
+    </nav>
+  </article>
+</BaseLayout>
+
+<style>
+  .article-shell {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .article-banner,
+  .article-body {
+    position: relative;
+    z-index: 1;
+  }
+
+  .article-banner {
+    max-width: calc(var(--content-narrow) + 6rem);
+    padding: 1.35rem 1.4rem;
+  }
+
+  .header-content {
+    gap: 0.9rem;
+  }
+
+  .article-kicker {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .article-body {
+    max-width: calc(var(--content-narrow) + 6rem);
+    padding: 1.6rem;
+  }
+
+  .article-prose {
+    max-width: var(--content-narrow);
+  }
+
+  .article-nav {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 760px) {
+    .article-body,
+    .article-banner {
+      padding: 1.15rem;
+    }
+  }
+</style>
