@@ -8,14 +8,14 @@ export const SCENE_META = {
   library: {
     label: 'Library room',
     mood: '阅览与过渡',
-    description: '图书馆现在更像前室与阅览桌，真正的分类书架被收进里面的藏书室。',
-    highlights: ['藏书室门', '总目录卡柜', '阅览桌', '归还车'],
+    description: '图书馆现在更像前室与阅览桌，借由导览牌、地面引导与门前过渡，把你安静地送往里面的藏书室。',
+    highlights: ['藏书室门', '总目录卡柜', '馆藏导览牌', '阅览桌'],
   },
   stacks: {
     label: 'Stacks room',
     mood: '分类与索引',
-    description: '藏书室里摆着整套大分类书架。你可以沿着书架直接进入对应馆藏分区。',
-    highlights: ['A-Z 总类书架', '总目录索引台', '回到图书馆的门'],
+    description: '藏书室把大类书架按分区排开，并用更清楚的通道、索引台与字母架签把路线梳理得更顺。',
+    highlights: ['人文文史区', '社会综合区', '自然技术区', '总目录索引台'],
   },
   gameRoom: {
     label: 'Game room',

@@ -14,7 +14,13 @@ import { withBase } from '@/utils/paths';
       </a>
 
       <div class="header-right">
-        <p class="status-pill">Catalog in place</p>
+        <div class="utility-row">
+          <p class="status-pill">Catalog in place</p>
+          <a class="search-pill" href={withBase('/search')} aria-label="打开检索页">
+            <span>检索</span>
+            <kbd>⌘K</kbd>
+          </a>
+        </div>
         <Nav />
       </div>
     </div>
@@ -73,7 +79,16 @@ import { withBase } from '@/utils/paths';
     gap: 0.55rem;
   }
 
-  .status-pill {
+  .utility-row {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .status-pill,
+  .search-pill {
     margin: 0;
     display: inline-flex;
     align-items: center;
@@ -87,6 +102,37 @@ import { withBase } from '@/utils/paths';
     letter-spacing: 0.08em;
     text-transform: uppercase;
     box-shadow: var(--shadow-soft);
+  }
+
+  .search-pill {
+    gap: 0.55rem;
+    transition:
+      transform 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .search-pill:hover {
+    transform: translateY(-1px);
+    color: var(--text);
+    border-color: color-mix(in srgb, var(--accent) 24%, var(--line) 76%);
+    background: color-mix(in srgb, var(--accent-soft) 28%, white 72%);
+  }
+
+  .search-pill kbd {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.25rem;
+    padding: 0 0.42rem;
+    border-radius: 0.45rem;
+    border: 1px solid color-mix(in srgb, var(--line) 78%, white 22%);
+    background: color-mix(in srgb, var(--panel) 80%, white 20%);
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 0.67rem;
+    letter-spacing: 0.04em;
+    text-transform: none;
   }
 
   @media (max-width: 760px) {
@@ -103,6 +149,10 @@ import { withBase } from '@/utils/paths';
     .header-right {
       width: 100%;
       justify-items: start;
+    }
+
+    .utility-row {
+      justify-content: flex-start;
     }
   }
 </style>

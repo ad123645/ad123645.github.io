@@ -43,8 +43,30 @@ const games = defineCollection({
   }),
 });
 
+const shelves = defineCollection({
+  loader: glob({
+    pattern: '**/*.{md,mdx}',
+    base: './src/content/shelves',
+  }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    shelfCode: z.string(),
+    featuredItems: z.array(
+      z.object({
+        type: z.enum(['post', 'page', 'game', 'catalog']),
+        id: z.string(),
+        label: z.string().optional(),
+      })
+    ).min(1),
+    tone: z.string().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
 export const collections = {
   blog,
   pages,
   games,
+  shelves,
 };

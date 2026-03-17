@@ -2,6 +2,7 @@
 import { getCollection, getEntry, render } from 'astro:content';
 import BlogLayout from '@/layouts/BlogLayout.astro';
 import { getPublishedPosts, getRelatedPosts } from '@/features/blog/api/posts';
+import { getShelvesContainingPost } from '@/features/shelves/api/getShelves';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
@@ -20,6 +21,7 @@ if (!entry) {
 
 const allPosts = await getPublishedPosts();
 const relatedPosts = getRelatedPosts(allPosts, entry, 3);
+const shelves = await getShelvesContainingPost(entry.id);
 const { Content } = await render(entry);
 ---
 
@@ -31,6 +33,7 @@ const { Content } = await render(entry);
   tags={entry.data.tags}
   catalogCode={entry.data.catalogCode}
   relatedPosts={relatedPosts}
+  shelves={shelves}
 >
   <Content />
 </BlogLayout>

@@ -1,0 +1,95 @@
+---
+import { getEntry, render } from 'astro:content';
+import PageLayout from '@/layouts/PageLayout.astro';
+import { getPublishedShelves, resolveShelfItems } from '@/features/shelves/api/getShelves';
+import { withBase } from '@/utils/paths';
+
+export async function getStaticPaths() {
+  const shelves = await getPublishedShelves();
+  return shelves.map((shelf) => ({ params: { slug: shelf.id } }));
+}
+
+const slug = Astro.params.slug!;
+const shelf = await getEntry('shelves', slug);
+if (!shelf) throw new Error(`Shelf not found: ${slug}`);
+const items = await resolveShelfItems(shelf);
+const { Content } = await render(shelf);
+---
+
+<PageLayout
+  title={shelf.data.title}
+  description={shelf.data.description}
+  intro={shelf.data.tone || shelf.data.description}
+>
+  <div class="section-toolbar">
+    <span class="shelf-code">{shelf.data.shelfCode}</span>
+    <a href={withBase('/shelves')} class="pill-link">回到专题书架</a>
+  </div>
+
+  <div class="shelf-detail-grid">
+    <section class="card-surface shelf-note">
+      <p class="panel-kicker">展签说明</p>
+      <div class="prose">
+        <Content />
+      </div>
+    </section>
+
+    <section class="card-surface shelf-items">
+      <div class="shelf-items-head">
+        <p class="panel-kicker">收录条目</p>
+        <h2>这一架上有什么</h2>
+      </div>
+      <div class="item-list">
+        {items.map((item) => (
+          <a href={item.href} class="item-card">
+            <span>{item.meta}</span>
+            <strong>{item.label || item.title}</strong>
+            <p>{item.description}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <style>
+    .shelf-code {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.2rem;
+      padding: 0 0.85rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--accent-soft) 28%, white 72%);
+      color: var(--text-muted);
+      box-shadow: var(--shadow-soft);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+    }
+    .shelf-detail-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+      gap: 1rem;
+    }
+    .shelf-note,
+    .shelf-items { padding: 1.15rem 1.2rem; }
+    .panel-kicker, .item-card span, .item-card p { margin: 0; color: var(--text-muted); }
+    .panel-kicker { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .shelf-items-head { display: grid; gap: 0.35rem; margin-bottom: 1rem; }
+    .shelf-items-head h2 { margin: 0; font-size: 1.45rem; line-height: 1.2; }
+    .item-list { display: grid; gap: 0.85rem; }
+    .item-card {
+      display: grid;
+      gap: 0.3rem;
+      padding: 0.95rem 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+      background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+      box-shadow: var(--shadow-soft);
+    }
+    .item-card strong { font-size: 1rem; line-height: 1.4; }
+    @media (max-width: 980px) {
+      .shelf-detail-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</PageLayout>

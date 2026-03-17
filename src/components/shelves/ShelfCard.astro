@@ -1,0 +1,78 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { withBase } from '@/utils/paths';
+
+interface Props {
+  shelf: CollectionEntry<'shelves'>;
+  compact?: boolean;
+}
+
+const { shelf, compact = false } = Astro.props;
+---
+
+<article class={`shelf-card card-surface${compact ? ' is-compact' : ''}`}>
+  <div class="shelf-head">
+    <p class="shelf-kicker">专题书架</p>
+    <span class="shelf-code">{shelf.data.shelfCode}</span>
+  </div>
+  <div class="shelf-copy">
+    <h3>{shelf.data.title}</h3>
+    <p>{shelf.data.description}</p>
+    {shelf.data.tone && <span class="shelf-tone">{shelf.data.tone}</span>}
+  </div>
+  <a class="pill-link" href={withBase(`/shelves/${shelf.id}`)}>打开这架展柜</a>
+</article>
+
+<style>
+  .shelf-card {
+    padding: 1rem 1.05rem;
+    display: grid;
+    gap: 0.8rem;
+  }
+  .shelf-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+  }
+  .shelf-kicker,
+  .shelf-copy p,
+  .shelf-tone {
+    margin: 0;
+    color: var(--text-muted);
+  }
+  .shelf-kicker {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .shelf-code {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.8rem;
+    padding: 0 0.65rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, white 18%);
+    background: color-mix(in srgb, var(--accent-soft) 32%, white 68%);
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .shelf-copy {
+    display: grid;
+    gap: 0.35rem;
+  }
+  .shelf-copy h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    line-height: 1.2;
+  }
+  .shelf-tone {
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+  .is-compact .shelf-copy h3 {
+    font-size: 1.05rem;
+  }
+</style>

@@ -25,6 +25,8 @@ const relatedPosts = getPostsByCatalogCode(posts, node.code, { includeDescendant
 const trail = getCatalogPath(node.code);
 const siblings = getSiblingCatalogNodes(node.code).filter((item) => item.code !== node.code);
 const activeChildren = summary.childrenWithCount.filter((child) => child.count > 0);
+const levelLabelMap: Record<number, string> = { 1: '一级分区', 2: '二级类', 3: '三级类', 4: '四级类', 5: '细分类' };
+const levelLabel = levelLabelMap[node.level] ?? `${node.level}级类`;
 ---
 
 <PageLayout
@@ -43,7 +45,7 @@ const activeChildren = summary.childrenWithCount.filter((child) => child.count >
   <div class="detail-grid">
     <section class="node-hero card-surface">
       <div class="node-main">
-        <p class="node-kicker">{node.level === 1 ? '一级分区' : '二级子类'}</p>
+        <p class="node-kicker">{levelLabel}</p>
         <h2>{node.code}</h2>
         <p class="node-name">{node.name}</p>
       </div>
@@ -86,6 +88,15 @@ const activeChildren = summary.childrenWithCount.filter((child) => child.count >
       )}
     </aside>
   </div>
+
+  {node.note && (
+    <section class="scope-panel card-surface">
+      <div class="panel-head">
+        <p class="node-kicker">本架说明</p>
+        <p>{node.note}</p>
+      </div>
+    </section>
+  )}
 
   {summary.childrenWithCount.length > 0 && (
     <section class="child-panel card-surface">
@@ -177,9 +188,15 @@ const activeChildren = summary.childrenWithCount.filter((child) => child.count >
 
     .metric-card,
     .detail-aside,
+    .scope-panel,
     .child-panel,
     .empty {
       padding: 1rem 1.05rem;
+    }
+
+    .scope-panel {
+      display: grid;
+      gap: 0.35rem;
     }
 
     .metric-card,

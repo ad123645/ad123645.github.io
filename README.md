@@ -126,3 +126,54 @@ catalogCode: TP
 ```
 
 你既可以挂在一级类，例如 `I`、`J`、`K`，也可以直接挂在图中已有的二级子类，例如 `G2`、`H0`、`Z4`。
+
+## 9. v10 新增：检索与写作工作流
+
+### 站内检索
+
+- 检索页：`/search`
+- 页头新增“检索”按钮
+- 桌面端快捷键：`Ctrl/⌘ + K` 与 `/`
+
+可以搜索：
+
+- 文章
+- 馆藏分类
+- 标签
+- 单页
+- 游戏条目
+
+### 新建文章脚本
+
+```bash
+npm run new:post -- --title="Astro 结构草稿" --catalog=TP --tags="Astro,前端"
+```
+
+可选参数：
+
+- `--template=blog-post`
+- `--template=devlog`
+
+### 内容检查脚本
+
+```bash
+npm run check:content
+```
+
+会检查 `src/content/blog/` 下的文章是否缺少这些字段：
+
+- `title`
+- `description`
+- `publishedAt`
+- `tags`
+- `draft`
+- `catalogCode`
+
+
+## 常用命令
+
+```bash
+npm run new:post -- --title="测试文章" --catalog=TP --tags="Astro,博客"
+npm run new:shelf -- --title="建站与整理" --code=S-01 --post=astro-structure-note
+npm run check:content
+```

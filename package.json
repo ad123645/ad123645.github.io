@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build",
+    "build": "npm run check:content && astro check && astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "check:content": "node scripts/check-content.mjs",
+    "new:post": "node scripts/new-post.mjs",
+    "new:shelf": "node scripts/new-shelf.mjs"
   },
   "dependencies": {
     "@astrojs/react": "latest",

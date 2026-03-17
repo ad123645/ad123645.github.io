@@ -9,12 +9,15 @@ import PostCard from '@/components/blog/PostCard.astro';
 import CatalogCard from '@/components/catalog/CatalogCard.astro';
 import { withBase } from '@/utils/paths';
 import { getCatalogSummary } from '@/features/catalog/helpers';
+import { getPublishedShelves } from '@/features/shelves/api/getShelves';
+import ShelfCard from '@/components/shelves/ShelfCard.astro';
 
 const allPosts = await getPublishedPosts();
 const posts = allPosts.slice(0, 3);
 const tags = (await getPostTags()).slice(0, 6);
 const catalogSummary = getCatalogSummary(allPosts);
 const activeCatalog = catalogSummary.filter((node) => node.count > 0).slice(0, 4);
+const shelves = (await getPublishedShelves()).slice(0, 2);
 
 const rooms = [
   {
@@ -188,6 +191,30 @@ const routes = [
         <div class="side-links">
           <a href={withBase('/catalog')} class="pill-link">打开完整目录</a>
           <a href={withBase('/archive')} class="pill-link">去归档页</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+
+  <section class="shell page-block shelves-block">
+    <SectionTitle
+      eyebrow="专题推荐"
+      title="馆长亲手拉出来的几排书"
+      intro="分类提供秩序，专题书架提供判断。它们可以跨文章、页面、游戏与目录。"
+    />
+
+    <div class="shelves-home-grid">
+      <div class="shelves-home-list">
+        {shelves.map((shelf) => <ShelfCard shelf={shelf} compact />)}
+      </div>
+      <aside class="card-surface catalog-side-note">
+        <p class="side-kicker">策展入口</p>
+        <h3>不是把书分好就结束</h3>
+        <p>专题书架会把跨分类、跨内容类型的条目重新摆到一起，更像馆长亲手整理出来的一排展柜。</p>
+        <div class="side-links">
+          <a href={withBase('/shelves')} class="pill-link">打开全部专题书架</a>
+          <a href={withBase('/search?q=建站')} class="pill-link">试试相关检索</a>
         </div>
       </aside>
     </div>
@@ -523,6 +550,19 @@ const routes = [
       gap: 1rem;
     }
 
+
+    .shelves-home-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(18rem, 0.82fr);
+      gap: 1rem;
+    }
+
+    .shelves-home-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
     .recent-head {
       display: flex;
       gap: 1rem;
@@ -532,6 +572,11 @@ const routes = [
     }
 
     @media (max-width: 980px) {
+      .shelves-home-grid,
+      .shelves-home-list {
+        grid-template-columns: 1fr;
+      }
+
       .hero-grid,
       .entry-grid,
       .recent-grid,

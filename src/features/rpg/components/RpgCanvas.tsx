@@ -127,6 +127,16 @@ function drawDecoration(context: CanvasRenderingContext2D, item: DecorationObjec
     context.lineWidth = 2;
     context.strokeRect(item.x + 8, item.y + 8, item.w - 16, item.h - 16);
   }
+
+  if (item.id.includes('zone-banner') || item.name.includes('导览牌')) {
+    context.save();
+    context.fillStyle = 'rgba(47, 42, 36, 0.82)';
+    context.font = item.id.includes('zone-banner') ? '600 12px ui-serif, serif' : '600 11px ui-serif, serif';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText(item.name, item.x + item.w / 2, item.y + item.h / 2 + 0.5);
+    context.restore();
+  }
 }
 
 function drawWall(context: CanvasRenderingContext2D, item: ObstacleObject) {
@@ -140,17 +150,34 @@ function drawWall(context: CanvasRenderingContext2D, item: ObstacleObject) {
 function drawShelf(context: CanvasRenderingContext2D, item: ObstacleObject) {
   fillRoundedRect(context, item.x, item.y, item.w, item.h, item.color ?? '#987a61', 8);
   context.fillStyle = 'rgba(64, 48, 37, 0.14)';
-  for (let y = item.y + 12; y < item.y + item.h - 8; y += 18) {
+  for (let y = item.y + 14; y < item.y + item.h - 10; y += 20) {
     context.fillRect(item.x + 4, y, item.w - 8, 3);
   }
   const stripePalette = ['#c8b59d', '#d9c6ae', '#7f9984', '#b68f77'];
   let index = 0;
   for (let x = item.x + 6; x < item.x + item.w - 8; x += 10) {
-    for (let y = item.y + 6; y < item.y + item.h - 10; y += 18) {
+    for (let y = item.y + 6; y < item.y + item.h - 12; y += 20) {
       context.fillStyle = stripePalette[index % stripePalette.length] ?? '#c8b59d';
       context.fillRect(x, y, 6, 10);
       index += 1;
     }
+  }
+
+  const code = item.name.match(/^(.+?)\s*书架$/)?.[1]?.trim();
+  if (code) {
+    const plaqueWidth = Math.min(item.w - 12, code.length > 1 ? 34 : 28);
+    const plaqueHeight = 18;
+    const plaqueX = item.x + item.w / 2 - plaqueWidth / 2;
+    const plaqueY = item.y + item.h / 2 - plaqueHeight / 2 + 2;
+    fillRoundedRect(context, plaqueX, plaqueY, plaqueWidth, plaqueHeight, 'rgba(251, 248, 242, 0.84)', 7);
+    strokeRoundedRect(context, plaqueX, plaqueY, plaqueWidth, plaqueHeight, 'rgba(137, 120, 102, 0.16)', 7, 1);
+    context.save();
+    context.fillStyle = 'rgba(47, 42, 36, 0.9)';
+    context.font = code.length > 1 ? '700 13px ui-serif, serif' : '700 16px ui-serif, serif';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText(code, item.x + item.w / 2, plaqueY + plaqueHeight / 2 + 0.5);
+    context.restore();
   }
 }
 
@@ -171,6 +198,14 @@ function drawIndexStand(context: CanvasRenderingContext2D, item: ObstacleObject)
   context.fillStyle = 'rgba(66, 50, 39, 0.16)';
   context.fillRect(item.x + item.w / 2 - 1, item.y + item.h - 14, 2, 12);
   fillRoundedRect(context, item.x + 6, item.y + item.h - 14, item.w - 12, 10, 'rgba(251, 248, 242, 0.14)', 8);
+  fillRoundedRect(context, item.x + item.w / 2 - 16, item.y + item.h / 2 - 9, 32, 18, 'rgba(251, 248, 242, 0.8)', 7);
+  context.save();
+  context.fillStyle = 'rgba(47, 42, 36, 0.88)';
+  context.font = '700 11px ui-serif, serif';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillText('索引', item.x + item.w / 2, item.y + item.h / 2 + 0.5);
+  context.restore();
 }
 
 function drawBenchOrSofa(context: CanvasRenderingContext2D, item: ObstacleObject) {

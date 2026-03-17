@@ -17,6 +17,7 @@ interface Props {
   tags?: string[];
   catalogCode?: string;
   relatedPosts?: CollectionEntry<'blog'>[];
+  shelves?: CollectionEntry<'shelves'>[];
 }
 
 const props = Astro.props;
@@ -63,6 +64,26 @@ const siblingShelves = getSiblingCatalogNodes(props.catalogCode)
         </div>
         <div class="neighbor-badges">
           {siblingShelves.map((node) => <CatalogBadge code={node.code} />)}
+        </div>
+      </section>
+    )}
+
+
+    {props.shelves && props.shelves.length > 0 && (
+      <section class="shelf-neighbors card-surface curated-shelves">
+        <div class="neighbor-head">
+          <p class="article-kicker">Curated shelves</p>
+          <h2>这篇文章也被收进了这些专题书架</h2>
+          <p>分类是它的架位，专题书架则是它被重新摆放后的关系线。</p>
+        </div>
+        <div class="curated-list">
+          {props.shelves.map((shelf) => (
+            <a href={withBase(`/shelves/${shelf.id}`)} class="curated-item">
+              <span>{shelf.data.shelfCode}</span>
+              <strong>{shelf.data.title}</strong>
+              <p>{shelf.data.description}</p>
+            </a>
+          ))}
         </div>
       </section>
     )}
@@ -175,6 +196,38 @@ const siblingShelves = getSiblingCatalogNodes(props.catalogCode)
     flex-wrap: wrap;
   }
 
+
+  .curated-shelves {
+    max-width: calc(var(--content-narrow) + 6rem);
+  }
+
+  .curated-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  .curated-item {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.9rem 0.95rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+    background: color-mix(in srgb, var(--panel-strong) 88%, white 12%);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .curated-item span,
+  .curated-item p {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  .curated-item strong {
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+
   .article-nav {
     display: flex;
     gap: 0.75rem;
@@ -182,6 +235,10 @@ const siblingShelves = getSiblingCatalogNodes(props.catalogCode)
   }
 
   @media (max-width: 760px) {
+    .curated-list {
+      grid-template-columns: 1fr;
+    }
+
     .article-body,
     .article-banner,
     .shelf-neighbors {

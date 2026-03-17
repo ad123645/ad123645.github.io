@@ -13,8 +13,8 @@ const totalChildren = sections.reduce((sum, node) => sum + node.childCount, 0);
 
 <PageLayout
   title="馆藏目录"
-  description="完整接入一级与二级目录的馆藏索引页"
-  intro={`这里保留一级与二级目录的完整骨架。当前 ${activeRoots.length} 个一级分区已经挂上文章，其余仍作为完整书架保留。`}
+  description="逐步接入多级馆藏分类的索引页"
+  intro={`这里保留全馆目录的完整骨架，并开始接入更细的多级分类。当前 ${activeRoots.length} 个一级分区已经挂上文章，其余仍作为完整书架保留。`}
 >
   <div class="section-toolbar">
     <a href={withBase('/blog')} class="pill-link">回到博客</a>
@@ -29,9 +29,9 @@ const totalChildren = sections.reduce((sum, node) => sum + node.childCount, 0);
       <p>完整保留顶层目录，作为全馆书架的总索引。</p>
     </article>
     <article class="info-card card-surface">
-      <p class="info-kicker">二级子类</p>
+      <p class="info-kicker">已接入下级类</p>
       <strong>{String(totalChildren).padStart(3, '0')}</strong>
-      <p>把图中的二级目录全部接进来，不只挑几格好看的入口。</p>
+      <p>目录会先从一级、二级向下细化，先扩你最常使用的分支，再逐步往更深层延伸。</p>
     </article>
     <article class="info-card card-surface">
       <p class="info-kicker">已入藏一级分区</p>

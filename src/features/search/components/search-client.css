@@ -1,0 +1,229 @@
+
+.search-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.72fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.search-panel,
+.search-side,
+.result-panel {
+  padding: 1.15rem 1.2rem;
+}
+
+.search-head,
+.result-head {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.search-label,
+.result-title,
+.side-title {
+  margin: 0;
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-muted);
+}
+
+.search-note,
+.result-state,
+.search-side ul,
+.empty-state span,
+.result-card p,
+.result-snippet,
+.search-empty {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.search-box-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.search-box-row input {
+  min-height: 3rem;
+  padding: 0 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+  background: color-mix(in srgb, var(--panel-strong) 92%, white 8%);
+  font: inherit;
+  color: var(--text);
+  box-shadow: var(--shadow-soft);
+  outline: none;
+}
+
+.search-box-row input:focus {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line) 60%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 45%, white 55%), var(--shadow-soft);
+}
+
+.clear-btn {
+  justify-content: center;
+}
+
+.filter-row,
+.quick-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.quick-row {
+  margin-top: 0.75rem;
+}
+
+.filter-chip,
+.quick-chip {
+  min-height: 2.2rem;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 88%, white 12%);
+  color: var(--text-muted);
+  box-shadow: var(--shadow-soft);
+  font: inherit;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.filter-chip:hover,
+.quick-chip:hover {
+  transform: translateY(-1px);
+}
+
+.filter-chip.is-active {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--line) 70%);
+  background: color-mix(in srgb, var(--accent-soft) 68%, white 32%);
+}
+
+.search-side ul {
+  padding-left: 1.15rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.search-side code,
+.search-note kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--panel-strong) 86%, white 14%);
+  border: 1px solid color-mix(in srgb, var(--line) 84%, white 16%);
+}
+
+.result-groups {
+  display: grid;
+  gap: 1rem;
+}
+
+.result-group-block {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.result-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 80%, white 20%);
+}
+
+.result-group-head strong {
+  font-size: 1rem;
+}
+
+.result-group-head span {
+  color: var(--text-muted);
+}
+
+.result-list {
+  display: grid;
+  gap: 0.85rem;
+  min-height: 2rem;
+}
+
+.result-card,
+.empty-state {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.95rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+  background: color-mix(in srgb, var(--panel-strong) 90%, white 10%);
+  box-shadow: var(--shadow-soft);
+}
+
+.result-card {
+  text-decoration: none;
+  color: inherit;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.result-card-head {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.result-group {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 1.6rem;
+  padding: 0 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-soft) 62%, white 38%);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.result-card strong {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.result-card:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 26%, var(--line) 74%);
+}
+
+.result-snippet {
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.empty-state p {
+  margin: 0;
+  font-weight: 600;
+}
+
+mark {
+  background: color-mix(in srgb, var(--accent-soft) 72%, white 28%);
+  color: inherit;
+  border-radius: 0.2rem;
+  padding: 0 0.1rem;
+}
+
+@media (max-width: 900px) {
+  .search-shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .search-box-row {
+    grid-template-columns: 1fr;
+  }
+}

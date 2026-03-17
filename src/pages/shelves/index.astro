@@ -1,0 +1,44 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import ShelfCard from '@/components/shelves/ShelfCard.astro';
+import { getPublishedShelves } from '@/features/shelves/api/getShelves';
+
+const shelves = await getPublishedShelves();
+const overview = [
+  { label: '专题书架', value: String(shelves.length).padStart(2, '0') },
+  { label: '策展方式', value: '人工' },
+  { label: '浏览节奏', value: '展柜' },
+];
+---
+
+<PageLayout
+  title="专题书架"
+  description="跨分类、跨内容类型的人工策展入口"
+  intro="分类给出骨架，专题书架给出判断。这里摆的是馆长亲手拉出来的一排书。"
+>
+  <div class="overview-grid info-grid three">
+    {overview.map((item) => (
+      <div class="info-card card-surface overview-card">
+        <p class="info-kicker">{item.label}</p>
+        <strong>{item.value}</strong>
+      </div>
+    ))}
+  </div>
+
+  <section class="shelf-grid">
+    {shelves.map((shelf) => <ShelfCard shelf={shelf} />)}
+  </section>
+
+  <style>
+    .overview-card { display: grid; gap: 0.3rem; }
+    .overview-card strong { font-size: 1.45rem; line-height: 1; }
+    .shelf-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    @media (max-width: 980px) {
+      .shelf-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</PageLayout>
