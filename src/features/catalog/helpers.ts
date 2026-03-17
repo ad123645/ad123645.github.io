@@ -81,8 +81,8 @@ export function getSiblingCatalogNodes(code?: string | null) {
   const node = getCatalogNodeByCode(code);
   if (!node?.parentCode) return [];
 
-  const top = catalogRoots.find((item) => item.code === node.parentCode);
-  return top?.children ?? [];
+  const parent = getCatalogNodeByCode(node.parentCode);
+  return parent?.children ?? [];
 }
 
 export function getTopLevelCatalogCodeOfPost(post: CollectionEntry<'blog'>) {
