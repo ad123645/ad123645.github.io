@@ -13,8 +13,8 @@ const totalChildren = sections.reduce((sum, node) => sum + node.childCount, 0);
 
 <PageLayout
   title="馆藏目录"
-  description="逐步接入多级馆藏分类的索引页"
-  intro={`这里保留全馆目录的完整骨架，并开始接入更细的多级分类。当前 ${activeRoots.length} 个一级分区已经挂上文章，其余仍作为完整书架保留。`}
+  description="博客的完整分类索引页"
+  intro={`这里放完整分类表。当前 ${activeRoots.length} 个一级分类已经挂上文章，其余分类也先保留在目录里。`}
 >
   <div class="section-toolbar">
     <a href={withBase('/blog')} class="pill-link">回到博客</a>
@@ -26,31 +26,31 @@ const totalChildren = sections.reduce((sum, node) => sum + node.childCount, 0);
     <article class="info-card card-surface">
       <p class="info-kicker">一级类</p>
       <strong>{String(sections.length).padStart(2, '0')}</strong>
-      <p>完整保留顶层目录，作为全馆书架的总索引。</p>
+      <p>分类会继续往下细分，此栏只展示一级分类数。</p>
     </article>
     <article class="info-card card-surface">
       <p class="info-kicker">已接入下级类</p>
       <strong>{String(totalChildren).padStart(3, '0')}</strong>
-      <p>目录会先从一级、二级向下细化，先扩你最常使用的分支，再逐步往更深层延伸。</p>
+      <p>分类会继续往下细分，此栏只展示二级分类数。</p>
     </article>
     <article class="info-card card-surface">
       <p class="info-kicker">已入藏一级分区</p>
       <strong>{String(activeRoots.length).padStart(2, '0')}</strong>
-      <p>目录是全量的，文章是慢慢长出来的，空架也仍然被保留。</p>
+      <p>有文章的分类会更加明显地展示给您。</p>
     </article>
   </section>
 
   <section class="catalog-workbench">
     <aside class="catalog-sidebar card-surface">
       <div class="sidebar-block">
-        <p class="sidebar-kicker">Quick index</p>
-        <h2>先从总索引找到要走的那一排</h2>
-        <p>左侧像目录柜，右侧像翻开的总表。活跃书架会先排上来，但未入藏的也不会被删除。</p>
+        <p class="sidebar-kicker">快速索引</p>
+        <h2>先从总表里找到要看的分类</h2>
+        <p>左边放常用跳转，全部一级类文章较多的分类会排得更前，右边是完整列表。</p>
       </div>
 
       {activeRoots.length > 0 && (
         <div class="sidebar-block">
-          <p class="sidebar-kicker">常被翻动</p>
+          <p class="sidebar-kicker">常用分类</p>
           <div class="sidebar-featured">
             {activeRoots.slice(0, 6).map((node) => (
               <a href={`#catalog-${node.slug}`}>
@@ -82,7 +82,7 @@ const totalChildren = sections.reduce((sum, node) => sum + node.childCount, 0);
         <section id={`catalog-${node.slug}`} class={`catalog-section card-surface ${node.count > 0 ? 'active' : 'quiet'}`}>
           <div class="section-head">
             <div>
-              <p class="section-kicker">一级分区</p>
+              <p class="section-kicker">一级分类</p>
               <h2>{node.code}</h2>
             </div>
             <div class="section-metrics">
@@ -92,8 +92,8 @@ const totalChildren = sections.reduce((sum, node) => sum + node.childCount, 0);
           </div>
 
           <div class="section-meta">
-            <p>{node.activeChildCount} / {node.childCount} 个子类已有文章挂入，未入藏的类目仍完整保留。</p>
-            <a href={withBase(`/catalog/${node.slug}`)} class="pill-link">打开 {node.code} 总架</a>
+            <p>{node.activeChildCount} / {node.childCount} 个子类下已经有文章，其他子类也先保留在目录里。</p>
+            <a href={withBase(`/catalog/${node.slug}`)} class="pill-link">查看 {node.code} 分类</a>
           </div>
 
           <div class="child-grid">
@@ -112,9 +112,9 @@ const totalChildren = sections.reduce((sum, node) => sum + node.childCount, 0);
 
       {inactiveRoots.length > 0 && (
         <section class="catalog-note card-surface">
-          <p class="section-kicker">Still in place</p>
-          <h2>未入藏的书架也继续保留</h2>
-          <p>它们现在安静，但目录位置已经在那里。等你未来写到它们时，不需要再重新发明秩序。</p>
+          <p class="section-kicker">暂时还空着</p>
+          <h2>感觉这里应该要有一张小卡片</h2>
+          <p>现在没有内容没关系，等到想写了再填进去吧。</p>
         </section>
       )}
     </div>

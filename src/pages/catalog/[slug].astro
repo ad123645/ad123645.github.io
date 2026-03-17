@@ -31,21 +31,21 @@ const levelLabelMap: Record<number, string> = { 1: '一级分区', 2: '二级类
 const levelLabel = levelLabelMap[node.level] ?? `第 ${node.level} 层`;
 const introCopy =
   node.level === 1
-    ? '一级分区会同时收拢挂在下级子类中的文章。'
+    ? '一级分类会把下级分类里的文章一起收进来。'
     : summary.childrenWithCount.length > 0
-      ? '这一层既保留父级路径，也继续向下展开更细的子类。'
-      : '这一层已经是当前目录树里的具体书架，会保留它在全馆中的父级路径。';
+      ? '这一层会保留上级路径，也会继续展开下级分类。'
+      : '这一层已经比较具体，页面里会保留它所属的上级路径。';
 ---
 
 <PageLayout
   title={`${node.code} · ${node.name}`}
   description={`馆藏目录 ${node.code} ${node.name}`}
-  intro={`这里是 ${node.code} ${node.name} 的目录页。${introCopy}`}
+  intro={`这里是 ${node.code} ${node.name} 的分类页。${introCopy}`}
 >
   <div class="section-toolbar">
     <a href={withBase('/catalog')} class="pill-link">回到完整目录</a>
     {trail[0] && trail[0].code !== node.code && (
-      <a href={withBase(`/catalog/${trail[0].slug}`)} class="pill-link">返回 {trail[0].code} 总架</a>
+      <a href={withBase(`/catalog/${trail[0].slug}`)} class="pill-link">返回 {trail[0].code} 一级分类</a>
     )}
     <a href={withBase('/blog')} class="pill-link">回到博客</a>
   </div>
@@ -60,15 +60,15 @@ const introCopy =
 
       <div class="node-side">
         <div class="metric-card">
-          <span>入藏文章</span>
+          <span>文章数量</span>
           <strong>{String(relatedPosts.length).padStart(2, '0')}</strong>
         </div>
         <div class="metric-card">
-          <span>下级子类</span>
+          <span>下级分类</span>
           <strong>{String(summary.childrenWithCount.length).padStart(2, '0')}</strong>
         </div>
         <div class="metric-card">
-          <span>已激活子类</span>
+          <span>已有文章的下级分类</span>
           <strong>{String(activeChildren.length).padStart(2, '0')}</strong>
         </div>
       </div>
@@ -86,7 +86,7 @@ const introCopy =
 
       {siblings.length > 0 && (
         <div class="aside-block">
-          <p class="node-kicker">同层相邻书架</p>
+          <p class="node-kicker">同层相邻分类</p>
           <div class="trail-row compact">
             {siblings.slice(0, 8).map((item) => (
               <CatalogBadge code={item.code} />
@@ -100,7 +100,7 @@ const introCopy =
   {node.note && (
     <section class="scope-panel card-surface">
       <div class="panel-head">
-        <p class="node-kicker">本架说明</p>
+        <p class="node-kicker">分类说明</p>
       </div>
       <div class="scope-note">
         <p>{node.note}</p>
@@ -111,8 +111,8 @@ const introCopy =
   {summary.childrenWithCount.length > 0 && (
     <section class="child-panel card-surface">
       <div class="panel-head">
-        <p class="node-kicker">下级子类</p>
-        <p>一级分区会保留全部子类，即使当前还没有文章也不会把书架撤掉。</p>
+        <p class="node-kicker">下级分类</p>
+        <p>下级分类会完整保留，即使当前还没有文章，也不会先从目录里移走。</p>
       </div>
       <div class="child-grid">
         {summary.childrenWithCount.map((child) => (
@@ -128,8 +128,8 @@ const introCopy =
 
   <section class="post-section">
     <div class="section-heading">
-      <h3>本架文章</h3>
-      <p>{relatedPosts.length > 0 ? '以下文章会归入这架目录，一级分区会自动收拢其子类文章。' : '本架暂未入藏文章，但目录位置已经预留好了。'}</p>
+      <h3>这个分类下的文章</h3>
+      <p>{relatedPosts.length > 0 ? '下面这些文章会归到这个分类下。一级分类也会自动收拢下级分类里的文章。' : '这个分类下暂时还没有文章，但目录位置已经先留好了。'}</p>
     </div>
 
     {relatedPosts.length > 0 ? (
@@ -138,7 +138,7 @@ const introCopy =
       </div>
     ) : (
       <div class="empty card-surface">
-        <p>这层书架现在还是空的，但它不是缺席，只是还没被你放上第一本书。</p>
+        <p>这个分类现在还没有文章，后面写到时可以直接放进来。</p>
       </div>
     )}
   </section>

@@ -30,7 +30,7 @@ const siblingShelves = getSiblingCatalogNodes(props.catalogCode)
 <BaseLayout title={props.title} description={props.description}>
   <article class="shell page-block article-shell">
     <header class="article-banner card-surface stack">
-      <p class="article-kicker">Reading note</p>
+      <p class="article-kicker">文章</p>
       <div class="stack header-content">
         <h1 class="page-title">{props.title}</h1>
         <p class="page-intro">{props.description}</p>
@@ -40,7 +40,7 @@ const siblingShelves = getSiblingCatalogNodes(props.catalogCode)
             <CatalogTrail code={catalogNode.code} />
             <div class="catalog-badges">
               <CatalogBadge code={catalogNode.code} mode="solid" />
-              <a href={withBase(`/catalog/${catalogNode.slug}`)} class="pill-link">打开这架目录</a>
+              <a href={withBase(`/catalog/${catalogNode.slug}`)} class="pill-link">查看这个分类</a>
             </div>
           </div>
         )}
@@ -58,9 +58,9 @@ const siblingShelves = getSiblingCatalogNodes(props.catalogCode)
     {catalogNode && siblingShelves.length > 0 && (
       <section class="shelf-neighbors card-surface">
         <div class="neighbor-head">
-          <p class="article-kicker">Nearby shelves</p>
+          <p class="article-kicker">相关分类</p>
           <h2>相邻书架</h2>
-          <p>这篇文章所在的位置不是孤岛，旁边几架也会慢慢长出它的邻居。</p>
+          <p>这篇文章所在的分类旁边，还有一些可以顺手继续看的相邻分类。</p>
         </div>
         <div class="neighbor-badges">
           {siblingShelves.map((node) => <CatalogBadge code={node.code} />)}
@@ -72,9 +72,9 @@ const siblingShelves = getSiblingCatalogNodes(props.catalogCode)
     {props.shelves && props.shelves.length > 0 && (
       <section class="shelf-neighbors card-surface curated-shelves">
         <div class="neighbor-head">
-          <p class="article-kicker">Curated shelves</p>
-          <h2>这篇文章也被收进了这些专题书架</h2>
-          <p>分类是它的架位，专题书架则是它被重新摆放后的关系线。</p>
+          <p class="article-kicker">专题收录</p>
+          <h2>这篇文章也出现在这些专题里</h2>
+          <p>分类决定它放在哪，专题书架则把它和别的内容重新放到一起看。</p>
         </div>
         <div class="curated-list">
           {props.shelves.map((shelf) => (
@@ -91,8 +91,8 @@ const siblingShelves = getSiblingCatalogNodes(props.catalogCode)
     {props.relatedPosts && props.relatedPosts.length > 0 && (
       <RelatedPostList
         posts={props.relatedPosts}
-        title="同架与邻架文章"
-        note="先沿着同一架继续看，偶尔再向旁边那排挪一步。"
+        title="同分类相关文章"
+        note="可以先看同一分类下的内容，再顺手看看附近分类。"
       />
     )}
 
@@ -100,7 +100,7 @@ const siblingShelves = getSiblingCatalogNodes(props.catalogCode)
       <a href={withBase('/blog')} class="pill-link">回到博客目录</a>
       <a href={withBase('/archive')} class="pill-link">查看归档</a>
       <a href={withBase('/catalog')} class="pill-link">浏览馆藏目录</a>
-      {catalogNode && <a href={withBase(`/catalog/${catalogNode.slug}`)} class="pill-link">回到当前书架</a>}
+      {catalogNode && <a href={withBase(`/catalog/${catalogNode.slug}`)} class="pill-link">回到当前分类</a>}
     </nav>
   </article>
 </BaseLayout>

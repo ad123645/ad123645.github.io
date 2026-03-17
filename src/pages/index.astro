@@ -17,58 +17,60 @@ const posts = allPosts.slice(0, 3);
 const tags = (await getPostTags()).slice(0, 6);
 const catalogSummary = getCatalogSummary(allPosts);
 const activeCatalog = catalogSummary.filter((node) => node.count > 0).slice(0, 4);
-const shelves = (await getPublishedShelves()).slice(0, 2);
+
+const allShelves = await getPublishedShelves();
+const shelves = allShelves.slice(0, 2);
 
 const rooms = [
   {
-    note: 'Reading stacks',
+    note: '文章入口',
     title: '博客文章',
     href: '/blog',
-    description: '正式文章、随手笔记、阅读记录，都收在这里。',
+    description: '文章、笔记和阅读记录都从这里进入。',
   },
   {
-    note: 'Side room',
+    note: '实验区',
     title: '游戏页',
     href: '/games',
-    description: '放实验作品、游戏原型，以及和交互有关的碎片。',
+    description: '这里放试作、demo 和一些交互方向的内容。',
   },
   {
-    note: 'Index cabinet',
+    note: '站点说明',
     title: '关于页',
     href: '/about',
-    description: '把站点缘起、个人简介与这间小馆的说明放进档案柜。',
+    description: '这里集中放站点说明和一些基础信息。',
   },
 ];
 
 const stats = [
-  { label: '已上架文章', value: String(allPosts.length).padStart(2, '0') },
-  { label: '开放房间', value: '03' },
-  { label: '浏览模式', value: '双轨' },
+  { label: '已上架文章数', value: String(allPosts.length).padStart(2, '0') },
+  { label: '已整理专题数', value: String(allShelves.length).padStart(2, '0') },
+  { label: '当前博客版本v2.0', value: '版本更新' },
 ];
 
 const principles = [
   {
-    kicker: 'Visual system',
-    title: '像同一座馆，而不是拼接楼层',
-    text: '首页、正文、游戏页都共享同一套纸面、描边、圆角与留白。',
+    kicker: '一触即达',
+    title: '全站检索',
+    text: '使用快捷键或首页按钮可打开全站检索功能，支持搜索书架、标签、博客文章等内容',
   },
   {
-    kicker: 'Content first',
-    title: '先有目录，再有陈列柜',
-    text: 'RPG 是入口层，真正的长期价值仍落在文章、项目与索引结构。',
+    kicker: '图书馆就像是天堂的样子',
+    title: '馆藏',
+    text: '按照中图索引号增加了数万细目，计划在未来能真正让读者们可以阅读到博主的pdf版本藏书',
   },
   {
-    kicker: 'Expandable',
-    title: '现在能跑，以后能长',
-    text: '场景对象和组件结构尽量拆开，为日后换贴图、加分类、添交互留空间。',
+    kicker: '还在尝试中',
+    title: 'RPG浏览模式',
+    text: 'RPG 入口只作为馆藏补充体验，真正要长期维护的还是文章、项目和索引等实质内容。',
   },
 ];
 
 const routes = [
-  { title: '大厅', note: '沉浸式入口', href: '/rpg' },
-  { title: '图书馆', note: '文章与阅读记录', href: '/blog' },
-  { title: '游戏室', note: '实验作品与 demo', href: '/games' },
-  { title: '档案柜', note: '关于与站点说明', href: '/about' },
+  { title: 'RPG浏览模式大厅', note: '入口', href: '/rpg' },
+  { title: '博客', note: '博客文章与随笔记录', href: '/blog' },
+  { title: '游戏室', note: '试作与 demo', href: '/games' },
+  { title: '相关信息', note: '关于与站点说明', href: '/about' },
 ];
 ---
 
@@ -77,15 +79,16 @@ const routes = [
     <div class="hero-grid">
       <div class="hero-copy card-surface stack">
         <p class="eyebrow">Library · Reading Room · Archive</p>
-        <h1>这很调和</h1>
+        <h1>这很调和的博客</h1>
         <p class="intro">
-          一个偏向图书馆、阅览室与档案馆气质的个人博客。
-          你可以从大厅慢慢逛，也可以直接翻开目录。
+          点击博客可以查看近期文章，全站搜索请按“Ctrl+K”或“/”快捷键打开或点击右上角的标记，
+          专题书架是博主整理的特殊分类组，游戏选项可能会放置一些游戏的小demo，
+          如果想再看看博主的介绍，可以点击关于此博客，或者继续向下看看。
         </p>
 
         <div class="actions">
-          <Button href="/rpg" variant="primary">进入阅览大厅</Button>
-          <Button href="/blog">直接浏览文章</Button>
+          <Button href="/rpg" variant="primary">进入 RPG 浏览 </Button>
+          <Button href="/blog">进入 传统 浏览</Button>
         </div>
 
         <div class="stat-row" aria-label="站点概览">
@@ -98,15 +101,14 @@ const routes = [
         </div>
 
         <div class="hero-bottom">
-          <p class="soft-note">大厅支持 RPG 式浏览，旁边也保留简洁入口，不把任何访客锁在旋转门里。</p>
-          <ModeSwitch />
+          <p class="soft-note">RPG模式为馆藏浏览提供更好的体验，感兴趣的朋友可点击上方进入RPG浏览</p>
         </div>
       </div>
 
       <aside class="card-surface catalog-panel" aria-label="馆内导览">
         <div class="stack panel-head">
-          <p class="panel-kicker">馆内导览</p>
-          <h2>先给访客一张索引卡</h2>
+          <p class="panel-kicker">这是一张冗余设计的小卡片，但是放在这里感觉很合适</p>
+          <h2>点击打开按钮可以进入对应页面</h2>
         </div>
 
         <div class="route-map" aria-hidden="true">
@@ -136,7 +138,7 @@ const routes = [
         </div>
 
         <div class="quote-box">
-          <p>希望每个页面都像抽屉式目录的一格，打开时有纸张的温度，也有秩序感。</p>
+          <p>最上方是RPG浏览模式大厅的简单导引，感兴趣的朋友可以点击RPG浏览模式大厅选项卡的打开按钮试试</p>
         </div>
       </aside>
     </div>
@@ -144,9 +146,9 @@ const routes = [
 
   <section class="shell page-block principles-block">
     <SectionTitle
-      eyebrow="设计原则"
-      title="让气质、结构与功能一起调和"
-      intro="把站点的骨架、皮肤和入口方式同时收拢，避免内容系统和小游戏系统互相扯袖子。"
+      eyebrow="该站近期更新和计划更新的内容"
+      title="施工进度"
+      intro="计划未来更新：站内小游戏，站内可视化动画浏览功能。下方为已实装的更新内容。"
     />
 
     <div class="info-grid three">
@@ -162,9 +164,9 @@ const routes = [
 
   <section class="shell page-block">
     <SectionTitle
-      eyebrow="馆藏索引"
-      title="从不同的门进入同一座馆"
-      intro="把博客、游戏、关于页都做成同一套材质与秩序，而不是互相串门的陌生楼层。"
+      eyebrow="点击对应选项卡即可进入页面"
+      title="功能导引"
+      intro="其实点右上角的按钮也可以啦……"
     />
 
     <div class="entry-grid">
@@ -174,9 +176,9 @@ const routes = [
 
   <section class="shell page-block catalog-block">
     <SectionTitle
-      eyebrow="馆藏目录"
-      title="让全量分类真正住进博客"
-      intro="一级总架和二级子类都已经接入。首页只先摆出最近常被翻动的几架书，其余目录收在完整索引页里。"
+      eyebrow="中图分类法已实装于博客"
+      title="馆藏目录"
+      intro="中图分类浩如烟海，希望没有遗漏。此栏会出现常用的分类目录。"
     />
 
     <div class="catalog-home-grid">
@@ -185,9 +187,9 @@ const routes = [
       </div>
 
       <aside class="card-surface catalog-side-note">
-        <p class="side-kicker">目录卡柜</p>
-        <h3>分类是书架，标签是书签</h3>
-        <p>文章现在除了标签，还会挂到完整的馆藏分类上。你可以按时间找，也可以按书架找。</p>
+        <p class="side-kicker">分类入口</p>
+        <h3>中图分类入口</h3>
+        <p>这么多的分类，不打开完整目录看看吗？</p>
         <div class="side-links">
           <a href={withBase('/catalog')} class="pill-link">打开完整目录</a>
           <a href={withBase('/archive')} class="pill-link">去归档页</a>
@@ -199,9 +201,9 @@ const routes = [
 
   <section class="shell page-block shelves-block">
     <SectionTitle
-      eyebrow="专题推荐"
-      title="馆长亲手拉出来的几排书"
-      intro="分类提供秩序，专题书架提供判断。它们可以跨文章、页面、游戏与目录。"
+      eyebrow="博主整理的专题合集"
+      title="专题推荐"
+      intro="馆藏还是太多了，使用专题和检索两个功能整理内容才能节省精力。"
     />
 
     <div class="shelves-home-grid">
@@ -209,9 +211,9 @@ const routes = [
         {shelves.map((shelf) => <ShelfCard shelf={shelf} compact />)}
       </div>
       <aside class="card-surface catalog-side-note">
-        <p class="side-kicker">策展入口</p>
-        <h3>不是把书分好就结束</h3>
-        <p>专题书架会把跨分类、跨内容类型的条目重新摆到一起，更像馆长亲手整理出来的一排展柜。</p>
+        <p class="side-kicker">相关的内容要做成合订本</p>
+        <h3>专题入口</h3>
+        <p>有些相关联的内容分散在不同分类里，放在同一个专题里会更利于学习与寻找。</p>
         <div class="side-links">
           <a href={withBase('/shelves')} class="pill-link">打开全部专题书架</a>
           <a href={withBase('/search?q=建站')} class="pill-link">试试相关检索</a>
@@ -224,8 +226,8 @@ const routes = [
     <div class="recent-head">
       <SectionTitle
         eyebrow="最近文章"
-        title="先把桌面上的目录卡整理好"
-        intro="首页不急着解释一切，先让人看到最新的书脊和标签。"
+        title="最近更新"
+        intro="等不及了，快点端上来罢"
       />
       <div class="recent-actions">
         <a href={withBase('/archive')} class="pill-link">查看完整归档</a>

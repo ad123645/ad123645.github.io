@@ -5,16 +5,16 @@ import { getPublishedShelves } from '@/features/shelves/api/getShelves';
 
 const shelves = await getPublishedShelves();
 const overview = [
-  { label: '专题书架', value: String(shelves.length).padStart(2, '0') },
-  { label: '策展方式', value: '人工' },
-  { label: '浏览节奏', value: '展柜' },
+  { label: '专题书架数', value: String(shelves.length).padStart(2, '0') },
+  { label: '专题选取方式', value: '人工选取' },
+  { label: '浏览方式', value: '请自由挑选感兴趣的专题浏览' },
 ];
 ---
 
 <PageLayout
   title="专题书架"
-  description="跨分类、跨内容类型的人工策展入口"
-  intro="分类给出骨架，专题书架给出判断。这里摆的是馆长亲手拉出来的一排书。"
+  description="把不同分类的内容按主题重新整理的页面"
+  intro="这里会把不同分类、不同类型的内容按主题重新整理，方便集中阅读。"
 >
   <div class="overview-grid info-grid three">
     {overview.map((item) => (

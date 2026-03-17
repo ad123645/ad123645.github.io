@@ -133,7 +133,7 @@ export default function SearchClient({ items, initialQuery = '' }: Props) {
 
   const quickQueries = ['TP', 'G2', '图书馆', '建站', '阅读'];
   const stateText = !query && activeFilter === 'all'
-    ? '先输入一点东西，目录柜会慢慢滑开。'
+    ? '输入关键词或分类号开始搜索。'
     : `找到 ${matched.length} 条结果 · 当前范围：${activeFilter === 'all' ? '全部' : FILTERS.find((item) => item.value === activeFilter)?.label || activeFilter}`;
 
   return (
@@ -141,8 +141,8 @@ export default function SearchClient({ items, initialQuery = '' }: Props) {
       <section className="search-shell">
         <div className="search-panel card-surface">
           <div className="search-head">
-            <label className="search-label" htmlFor="site-search">馆内检索</label>
-            <p className="search-note">支持文章、馆藏目录、标签、单页、游戏条目与专题书架。桌面端可按 <kbd>⌘/Ctrl + K</kbd> 或 <kbd>/</kbd>。</p>
+            <label className="search-label" htmlFor="site-search">站内搜索</label>
+            <p className="search-note">可以搜索文章、分类、标签、页面、游戏条目和专题书架。桌面端可按 <kbd>⌘/Ctrl + K</kbd> 或 <kbd>/</kbd>。</p>
           </div>
 
           <div className="search-box-row">
@@ -150,7 +150,7 @@ export default function SearchClient({ items, initialQuery = '' }: Props) {
               id="site-search"
               data-search-input
               type="search"
-              placeholder="试试 TP、图书馆、Astro、阅读、建站与整理……"
+              placeholder="试试 TP、Astro、图书馆、建站……"
               autoComplete="off"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -179,11 +179,11 @@ export default function SearchClient({ items, initialQuery = '' }: Props) {
         </div>
 
         <aside className="search-side card-surface">
-          <p className="side-title">检索习惯</p>
+          <p className="side-title">搜索建议</p>
           <ul>
-            <li>输分类号，例如 <code>TP</code>、<code>G2</code></li>
-            <li>输关键词，例如 <code>Astro</code>、<code>图书馆</code></li>
-            <li>输书架名，例如 <code>建站与整理</code></li>
+            <li>输入分类号，比如 <code>TP</code>、<code>G2</code></li>
+            <li>输入关键词，比如 <code>Astro</code>、<code>图书馆</code></li>
+            <li>输入专题名，比如 <code>建站与整理</code></li>
           </ul>
         </aside>
       </section>
@@ -218,8 +218,8 @@ export default function SearchClient({ items, initialQuery = '' }: Props) {
             </section>
           )) : (
             <div className="empty-state">
-              <p>这一格暂时没有抽屉。</p>
-              <span>换一个分类号、标签、书架名或关键词试试。</span>
+              <p>没有找到结果。</p>
+              <span>换个关键词、分类号或标签再试试。</span>
             </div>
           )}
         </div>

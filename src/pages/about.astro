@@ -8,21 +8,21 @@ const { Content } = await render(entry!);
 
 const principles = [
   {
-    title: '内容先于特效',
-    text: '所有交互都服务于索引、阅读和归档，不拿装饰去盖住内容本身。',
+    title: '个人邮箱与QQ',
+    text: '1253184323@qq.com',
   },
   {
-    title: '组件先于堆砌',
-    text: '尽量把页面、样式、场景和逻辑拆开，让未来扩展不是拆墙，而是加书架。',
+    title: '个人知乎',
+    text: 'https://www.zhihu.com/people/tan-qin-shuo-ai-78',
   },
   {
-    title: '统一先于花哨',
-    text: '博客、游戏页和 RPG 前厅共享一套材质和节奏，维持整站的同一呼吸。',
+    title: 'B站空间',
+    text: 'https://space.bilibili.com/283413867',
   },
 ];
 ---
 
-<PageLayout title="关于" description={entry?.data.description} intro="一张简洁的馆藏卡，介绍这个站点打算长期保存什么。">
+<PageLayout title="关于" description={entry?.data.description} intro="简单介绍一下这个站点，以及我准备长期放些什么。">
   <div class="about-grid">
     <div class="card-surface prose-panel">
       <div class="prose">
@@ -31,11 +31,11 @@ const principles = [
     </div>
 
     <aside class="card-surface side-note">
-      <p class="side-kicker">Quick index</p>
-      <h2>这间小馆打算放什么</h2>
+      <p class="side-kicker">概览</p>
+      <h2>这里主要放什么</h2>
       <ul>
         <li>文章与笔记</li>
-        <li>小游戏与互动实验</li>
+        <li>小游戏和互动实验</li>
         <li>阅读记录与长期项目</li>
       </ul>
       <div class="side-links">
@@ -49,7 +49,7 @@ const principles = [
     <div class="info-grid three">
       {principles.map((item) => (
         <article class="info-card card-surface principle-card">
-          <p class="info-kicker">建站原则</p>
+          <p class="info-kicker">相关信息</p>
           <h3>{item.title}</h3>
           <p>{item.text}</p>
         </article>

@@ -17,7 +17,7 @@ const counts = [
 <PageLayout
   title="检索"
   description="搜索文章、馆藏目录、标签与页面"
-  intro="把站点当作一座真正可检索的小馆。这里可以同时搜文章、馆藏分类、标签、单页、游戏和专题书架。"
+  intro="这里可以一起搜索文章、分类、标签、页面、游戏和专题书架。"
 >
   <div class="overview-grid info-grid three wide-grid">
     {counts.map((item) => (
@@ -34,7 +34,7 @@ const counts = [
     <section class="result-panel card-surface">
       <div class="result-head">
         <p class="result-title">检索结果</p>
-        <p class="result-state">当前浏览器未启用脚本，先提供馆内入口索引。</p>
+        <p class="result-state">当前浏览器没有启用脚本，先显示一部分可访问入口。</p>
       </div>
       <div class="result-list">
         {searchItems.slice(0, 18).map((item) => (

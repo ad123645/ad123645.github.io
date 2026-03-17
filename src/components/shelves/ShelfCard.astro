@@ -20,7 +20,7 @@ const { shelf, compact = false } = Astro.props;
     <p>{shelf.data.description}</p>
     {shelf.data.tone && <span class="shelf-tone">{shelf.data.tone}</span>}
   </div>
-  <a class="pill-link" href={withBase(`/shelves/${shelf.id}`)}>打开这架展柜</a>
+  <a class="pill-link" href={withBase(`/shelves/${shelf.id}`)}>打开专题</a>
 </article>
 
 <style>

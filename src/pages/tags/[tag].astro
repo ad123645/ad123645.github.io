@@ -18,7 +18,7 @@ const posts = getPostsByTag(await getPublishedPosts(), tag);
 <PageLayout
   title={`标签：${tag}`}
   description={`标签 ${tag} 下的文章`}
-  intro={`这个标签下当前有 ${posts.length} 篇文章。标签页会在内容渐渐增多时，替代部分分类学焦虑。`}
+  intro={`这个标签下当前有 ${posts.length} 篇文章。这里适合从一个具体话题继续往下看。`}
 >
   <div class="section-toolbar">
     <a href={withBase('/blog')} class="pill-link">返回博客</a>
@@ -31,7 +31,7 @@ const posts = getPostsByTag(await getPublishedPosts(), tag);
       {posts.map((post) => <PostCard post={post} />)}
     </div>
   ) : (
-    <div class="empty card-surface">这个标签页暂时还是空抽屉。</div>
+    <div class="empty card-surface">这个标签下暂时还没有内容。</div>
   )}
 
   <style>

@@ -12,10 +12,10 @@ const { title, href, description, note } = Astro.props;
 ---
 
 <a class="card-surface entry-card" href={withBase(href)}>
-  <p class="note">{note ?? 'Catalog'}</p>
+  <p class="note">{note ?? '入口'}</p>
   <h3>{title}</h3>
   <p class="desc">{description}</p>
-  <span class="more">打开目录</span>
+  <span class="more">进入</span>
 </a>
 
 <style>

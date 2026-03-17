@@ -28,7 +28,7 @@ const { Content } = await render(shelf);
 
   <div class="shelf-detail-grid">
     <section class="card-surface shelf-note">
-      <p class="panel-kicker">展签说明</p>
+      <p class="panel-kicker">专题说明</p>
       <div class="prose">
         <Content />
       </div>
@@ -37,7 +37,7 @@ const { Content } = await render(shelf);
     <section class="card-surface shelf-items">
       <div class="shelf-items-head">
         <p class="panel-kicker">收录条目</p>
-        <h2>这一架上有什么</h2>
+        <h2>这个专题里有什么</h2>
       </div>
       <div class="item-list">
         {items.map((item) => (

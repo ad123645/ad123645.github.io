@@ -6,38 +6,37 @@ import RpgCanvas from '@/features/rpg/components/RpgCanvas';
 const roomCards = [
   {
     title: '大厅',
-    text: '负责分流与欢迎，是沉浸式入口的前厅。',
+    text: '负责分流和欢迎，相当于这个入口的起点。',
   },
   {
     title: '图书馆',
-    text: '现在更像阅览前室与过渡房间，负责把你送往藏书室。',
+    text: '这里更像过渡区域，会把你带到真正的分类书架。',
   },
   {
     title: '藏书室',
-    text: '整套大分类书架按分区排开，书架正面会直接标出更醒目的分类字母。',
+    text: '主要分类都排在这里，找方向会比在大厅里更直接。',
   },
   {
     title: '游戏室',
-    text: '承接小作品与实验页面，但风格继续服从整站。',
+    text: '放小游戏和实验内容，不过整体风格还是和全站保持一致。',
   },
 ];
 ---
 
-<RpgLayout title="RPG 阅览大厅" description="WASD 移动，E 交互。">
+<RpgLayout title="RPG 阅览大厅" description="WASD 移动，E 键交互。">
   <div class="rpg-grid">
     <section class="stack hero-side">
       <div class="stack">
-        <p class="page-kicker">Immersive entry</p>
+        <p class="page-kicker">RPG 入口</p>
         <h1 class="page-title">RPG 阅览大厅</h1>
         <p class="page-intro">
-          这是首页的沉浸式入口原型。你可以在大厅、图书馆、藏书室和游戏室之间移动。
-          右侧的页面系统仍然保持统一，不会突然变成另一套宇宙。
+          这是一个可以走动浏览的页面原型。你可以在大厅、图书馆、藏书室和游戏室之间移动。
         </p>
       </div>
 
       <div class="hero-actions">
         <Button href="/blog">去博客</Button>
-        <Button href="/games">去游戏页</Button>
+        <Button href="/games">去游戏区</Button>
         <Button href="/about">去关于页</Button>
         <Button href="/catalog">去馆藏目录</Button>
       </div>
@@ -45,7 +44,7 @@ const roomCards = [
       <div class="info-grid three room-grid">
         {roomCards.map((item) => (
           <article class="info-card card-surface room-card">
-            <p class="info-kicker">Room</p>
+            <p class="info-kicker">区域</p>
             <h2>{item.title}</h2>
             <p>{item.text}</p>
           </article>
@@ -58,18 +57,18 @@ const roomCards = [
       <ul>
         <li>WASD 或方向键移动</li>
         <li>E 键交互</li>
-        <li>门、告示牌、书架入口都是独立对象</li>
-        <li>当前版本优先验证结构，再逐步替换贴图</li>
-        <li>图书馆会把你引到藏书室，真正的大分类书架在那里展开</li>
+        <li>门、告示牌和书架入口都能单独交互</li>
+        <li>当前版本先确认结构和交互，再慢慢替换素材</li>
+        <li>图书馆会把你带到藏书室，主要分类会在那边展开</li>
       </ul>
-      <p class="control-foot">目标不是把博客伪装成游戏，而是给首页增加一层能走动的空间感。</p>
+      <p class="control-foot">还在构思中……如果有建议可以到“关于此博客”页面中寻找联系方式联系我！</p>
     </aside>
   </div>
 
   <RpgCanvas client:load />
 
   <p class="rpg-note">
-    操作方式：WASD / 方向键移动，E 键交互。当前版本使用几何占位物体，但对象分层已经按未来可替换贴图的方式整理。
+    操作方式：WASD / 方向键移动，E 键交互。当前版本先用简单图形占位，后面再慢慢补素材。
   </p>
 
   <style>

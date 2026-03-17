@@ -22,14 +22,14 @@ const groupedByShelf = [...getPostsGroupedByTopCatalog(posts).entries()]
 const overview = [
   { label: '文章数量', value: String(posts.length).padStart(2, '0') },
   { label: '标签数量', value: String(tags.length).padStart(2, '0') },
-  { label: '活跃书架', value: String(topCatalog.length).padStart(2, '0') },
+  { label: '活跃分类', value: String(topCatalog.length).padStart(2, '0') },
 ];
 ---
 
 <PageLayout
   title="博客"
   description="文章目录"
-  intro="这里是正常浏览入口。即使不进入 RPG 模式，也能顺畅访问全部内容，并按馆藏目录或标签寻找文章。"
+  intro="这里是本站博客文章的集散地，常用标签也可通过本页抵达"
 >
   <div class="section-toolbar">
     <a href={withBase('/archive')} class="pill-link">查看归档</a>
@@ -51,7 +51,7 @@ const overview = [
     {featured && (
       <article class="card-surface featured-post">
         <div class="featured-copy">
-          <p class="feature-kicker">最近整理</p>
+          <p class="feature-kicker">最近更新</p>
           <h2>{featured.data.title}</h2>
           <p class="feature-desc">{featured.data.description}</p>
         </div>
@@ -69,7 +69,6 @@ const overview = [
 
         <div class="feature-actions">
           <a href={withBase(`/blog/${featured.id}`)} class="pill-link">阅读这篇文章</a>
-          <a href={withBase('/archive')} class="pill-link">查看完整归档</a>
         </div>
       </article>
     )}
@@ -78,7 +77,7 @@ const overview = [
       <div class="tag-cloud card-surface">
         <div class="cloud-head">
           <p class="cloud-title">常用标签</p>
-          <p class="cloud-note">标签像书签，馆藏目录像书架。两者现在会一起工作。</p>
+          <p class="cloud-note">标签和分类会一起用，一个补充主题，一个负责归位。</p>
         </div>
         <div class="cloud-links">
           {tags.map((tag) => (
@@ -92,9 +91,9 @@ const overview = [
   {topCatalog.length > 0 && (
     <section class="catalog-strip">
       <div class="catalog-strip-head">
-        <p class="feature-kicker">馆藏浏览</p>
-        <h2>目录不只是一张总表，也该长进文章列表里</h2>
-        <p class="feature-desc">这些是当前最活跃的一级书架。完整总目录会保留全部一级与二级类目。</p>
+        <p class="feature-kicker">重量级分类</p>
+        <h2>分类浏览</h2>
+        <p class="feature-desc">这里先放当前文章较多的一级分类。</p>
       </div>
       <div class="catalog-strip-grid">
         {topCatalog.slice(0, 4).map((node) => <CatalogCard node={node} compact />)}
@@ -104,9 +103,10 @@ const overview = [
 
   <section class="shelf-browser card-surface">
     <div class="shelf-browser-head">
-      <p class="feature-kicker">By shelf</p>
-      <h2>也可以沿着书架一排排看</h2>
-      <p class="feature-desc">这不是筛选器，而是另一种浏览节奏。先看整排，再翻单篇。</p>
+      <p class="feature-kicker">分类排序</p>
+      <h2>分类降序</h2>
+      <p class="feature-desc">按文章数量降序排列分类，在你感兴趣的大类寻找内容。
+      再下方的各博文则是除已置顶的最新博文外，按照发布时间降序排列。</p>
     </div>
     <div class="shelf-jump">
       {groupedByShelf.map((group) => (
@@ -129,10 +129,10 @@ const overview = [
         <article id={`shelf-${group.node.slug}`} class="shelf-section card-surface">
           <div class="shelf-section-head">
             <div>
-              <p class="feature-kicker">Shelf section</p>
+              <p class="feature-kicker">书架一览</p>
               <h2>{group.code} · {group.node.name}</h2>
             </div>
-            <a href={withBase(`/catalog/${group.node.slug}`)} class="pill-link">打开这架目录</a>
+            <a href={withBase(`/catalog/${group.node.slug}`)} class="pill-link">查看这个分类</a>
           </div>
           <ul class="shelf-post-list">
             {group.posts.map((post) => (

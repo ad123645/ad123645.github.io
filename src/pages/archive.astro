@@ -17,7 +17,7 @@ const groupedByShelf = [...getPostsGroupedByTopCatalog(posts).entries()]
 <PageLayout
   title="归档"
   description="所有文章的归档索引"
-  intro="当文章慢慢变多，这里既能按时间翻，也能沿着馆藏书架慢慢找。"
+  intro="文章多起来之后，这里可以按时间看，也可以按分类看。"
 >
   <div class="section-toolbar">
     <a href={withBase('/blog')} class="pill-link">回到博客</a>
@@ -27,18 +27,18 @@ const groupedByShelf = [...getPostsGroupedByTopCatalog(posts).entries()]
   <div class="archive-grid">
     <section class="archive-panel card-surface">
       <div class="panel-head">
-        <p class="panel-kicker">By time</p>
+        <p class="panel-kicker">按时间</p>
         <h2>按时间翻</h2>
-        <p>像从最新的一叠目录卡往后翻，先看到时间，再追到具体文章。</p>
+        <p>先看更新时间，再去找具体文章。适合从近到远慢慢翻。</p>
       </div>
       <ArchiveList posts={posts} />
     </section>
 
     <section class="catalog-panel card-surface">
       <div class="panel-head">
-        <p class="panel-kicker">By shelf</p>
+        <p class="panel-kicker">按分类</p>
         <h2>按书架找</h2>
-        <p>分类是秩序骨架，标签是临时书签。这里沿着书架把文章重新排一遍。</p>
+        <p>这里会按分类重新整理一遍文章，方便你从主题往下看。</p>
       </div>
 
       <div class="shelf-archive-list">
@@ -49,7 +49,7 @@ const groupedByShelf = [...getPostsGroupedByTopCatalog(posts).entries()]
                 <strong>{group.code}</strong>
                 <span>{group.node.name}</span>
               </div>
-              <a href={withBase(`/catalog/${group.node.slug}`)} class="pill-link">打开书架</a>
+              <a href={withBase(`/catalog/${group.node.slug}`)} class="pill-link">打开分类</a>
             </div>
             <ArchiveList posts={group.posts} />
           </article>
