@@ -6,7 +6,7 @@ export const dialogs: Record<string, string> = {
   libraryShelf:
     '图书馆为一个过渡区域。完整分类书架放在图书馆右上角的藏书室里。',
   libraryDesk:
-    '阅览桌上写着：“谢谢yorisou的帮助”，桌上好像还放着一块博主的铜牌，yorisou友链：https://nucleargezi.github.io/',
+    '阅览桌上写着：“谢谢yorisou的帮助”，桌上好像还放着一块博主的铜牌。',
   stackDoor:
     '穿过这道门就会进到按分类排开的藏书室。书架上会标有对应的分类字母。',
   gamePoster:
