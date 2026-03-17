@@ -6,13 +6,14 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "npm run check:content && astro check && astro build",
+    "build": "npm run sync:admin-catalog && npm run check:content && astro check && astro build",
     "preview": "astro preview",
     "check": "astro check",
     "check:content": "node scripts/check-content.mjs",
     "new:post": "node scripts/new-post.mjs",
     "new:shelf": "node scripts/new-shelf.mjs",
-    "verify:catalog": "node scripts/verify-catalog.mjs"
+    "verify:catalog": "node scripts/verify-catalog.mjs",
+    "sync:admin-catalog": "node scripts/build-admin-catalog-index.mjs"
   },
   "dependencies": {
     "@astrojs/react": "latest",
