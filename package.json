@@ -13,15 +13,17 @@
     "new:post": "node scripts/new-post.mjs",
     "new:shelf": "node scripts/new-shelf.mjs",
     "verify:catalog": "node scripts/verify-catalog.mjs",
-    "sync:admin-catalog": "node scripts/build-admin-catalog-index.mjs"
+    "sync:admin-catalog": "node scripts/build-admin-catalog-index.mjs",
+    "deploy:pi": "powershell -ExecutionPolicy Bypass -File .\\scripts\\deploy-to-pi.ps1"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.8",
     "@astrojs/react": "latest",
     "astro": "latest",
     "react": "latest",
     "react-dom": "latest"
   },
   "devDependencies": {
-    "typescript": "latest"
+    "typescript": "^5.9.3"
   }
 }
