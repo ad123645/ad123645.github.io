@@ -20,8 +20,11 @@
     "@astrojs/check": "^0.9.8",
     "@astrojs/react": "latest",
     "astro": "latest",
+    "katex": "^0.16.40",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

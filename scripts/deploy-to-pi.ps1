@@ -1,8 +1,7 @@
 param(
-    [string]$PiHost = "ad123645.local",
+    [string]$PiHost = "10.32.48.184",
     [string]$PiUser = "ad123645",
     [string]$TargetDir = "/var/www/html",
-    [string]$BackupBase = "/home/ad123645/site-backups",
     [switch]$SkipBuild
 )
 
@@ -15,9 +14,8 @@ Set-Location $ProjectRoot
 
 $Remote = "$PiUser@$PiHost"
 $DistDir = Join-Path $ProjectRoot "dist"
-$TmpDir = Join-Path $ProjectRoot ".deploy_tmp"
-
-New-Item -ItemType Directory -Force -Path $TmpDir | Out-Null
+$TarPath = Join-Path $ProjectRoot "dist.tar"
+$RemoteScriptLocal = Join-Path $ProjectRoot "remote-deploy.sh"
 
 if (-not $SkipBuild) {
     Write-Host "==> Building site..." -ForegroundColor Cyan
@@ -31,92 +29,83 @@ if (-not (Test-Path $DistDir)) {
     throw "dist folder not found. Run npm run build first."
 }
 
-$Stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$ArchiveName = "dist-$Stamp.tar.gz"
-$ArchivePath = Join-Path $TmpDir $ArchiveName
-$RemoteArchivePath = "/home/$PiUser/$ArchiveName"
-
-if (Test-Path $ArchivePath) {
-    Remove-Item $ArchivePath -Force
+if (Test-Path $TarPath) {
+    Remove-Item $TarPath -Force
 }
 
-Write-Host "==> Creating archive..." -ForegroundColor Cyan
-tar -czf $ArchivePath -C $DistDir .
+Write-Host "==> Creating dist.tar..." -ForegroundColor Cyan
+tar -cf $TarPath -C $DistDir .
 if ($LASTEXITCODE -ne 0) {
-    throw "Archive creation failed."
+    throw "Failed to create dist.tar"
 }
 
-Write-Host "==> Uploading archive..." -ForegroundColor Cyan
-scp $ArchivePath "${Remote}:$RemoteArchivePath"
-if ($LASTEXITCODE -ne 0) {
-    throw "Archive upload failed."
-}
-
-$RemoteScript = @'
+$RemoteScript = @"
+#!/usr/bin/env bash
 set -euo pipefail
 
-TAR_PATH="$1"
-TARGET_DIR="$2"
-BACKUP_BASE="$3"
+TARGET_DIR="$TargetDir"
 
-TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
-STAGING_DIR="$(mktemp -d)"
-BACKUP_DIR=""
+echo "==> Checking free space..."
+df -h /
 
-cleanup() {
-  rm -rf "$STAGING_DIR"
-}
-trap cleanup EXIT
+echo "==> Preparing staging..."
+mkdir -p ~/deploy-staging
+rm -rf ~/deploy-staging/*
 
-mkdir -p "$BACKUP_BASE"
+echo "==> Extracting tar to staging..."
+tar -xf ~/dist.tar -C ~/deploy-staging
 
-echo "==> Extracting archive..."
-tar -xzf "$TAR_PATH" -C "$STAGING_DIR"
+echo "==> Verifying staging content..."
+find ~/deploy-staging | wc -l
+du -sh ~/deploy-staging
 
-if [ -d "$TARGET_DIR" ] && [ -n "$(find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
-  BACKUP_DIR="$BACKUP_BASE/site-$TIMESTAMP"
-  mkdir -p "$BACKUP_DIR"
-  echo "==> Backing up current site to $BACKUP_DIR"
-  sudo rsync -a --ignore-errors "$TARGET_DIR"/ "$BACKUP_DIR"/ || echo "Backup had some missing files, continuing..."
-fi
+echo "==> Syncing to target..."
+sudo mkdir -p "$TargetDir"
+sudo rsync -a --delete ~/deploy-staging/ "$TargetDir"/
 
-echo "==> Replacing site files..."
-sudo mkdir -p "$TARGET_DIR"
-sudo find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
-
-echo "==> Copying new site..."
-sudo rsync -a "$STAGING_DIR"/ "$TARGET_DIR"/
-sudo chown -R www-data:www-data "$TARGET_DIR"
-
-echo "==> Fixing permissions..."
-sudo find "$TARGET_DIR" -type d -exec chmod 755 {} \;
-sudo find "$TARGET_DIR" -type f -exec chmod 644 {} \;
+echo "==> Fixing ownership..."
+sudo chown -R www-data:www-data "$TargetDir"
 
 echo "==> Reloading nginx..."
 sudo systemctl reload nginx
 
 echo "==> Cleaning up..."
-rm -f "$TAR_PATH"
+rm -f ~/dist.tar
+rm -rf ~/deploy-staging
 
-echo "Deployment complete."
-if [ -n "$BACKUP_DIR" ]; then
-  echo "Backup saved at: $BACKUP_DIR"
-fi
-'@
+echo "==> Done."
+"@
 
+# 关键：强制写成 Unix LF，避免 CRLF 把 bash 弄坏
 $RemoteScript = $RemoteScript -replace "`r`n", "`n"
-$RemoteScriptB64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($RemoteScript))
+$Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($RemoteScriptLocal, $RemoteScript, $Utf8NoBom)
 
-Write-Host "==> Running remote deployment..." -ForegroundColor Cyan
-ssh $Remote "printf '%s' '$RemoteScriptB64' | base64 -d | bash -s -- '$RemoteArchivePath' '$TargetDir' '$BackupBase'"
+Write-Host "==> Uploading dist.tar..." -ForegroundColor Cyan
+scp $TarPath "${Remote}:~/dist.tar"
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to upload dist.tar"
+}
+
+Write-Host "==> Uploading remote deploy script..." -ForegroundColor Cyan
+scp $RemoteScriptLocal "${Remote}:~/remote-deploy.sh"
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to upload remote deploy script"
+}
+
+Write-Host "==> Deploying on Raspberry Pi..." -ForegroundColor Cyan
+ssh $Remote "chmod +x ~/remote-deploy.sh && bash ~/remote-deploy.sh && rm -f ~/remote-deploy.sh"
 if ($LASTEXITCODE -ne 0) {
     throw "Remote deployment failed."
 }
 
-if (Test-Path $ArchivePath) {
-    Remove-Item $ArchivePath -Force
+if (Test-Path $TarPath) {
+    Remove-Item $TarPath -Force
+}
+if (Test-Path $RemoteScriptLocal) {
+    Remove-Item $RemoteScriptLocal -Force
 }
 
 Write-Host ""
 Write-Host "Deployment succeeded." -ForegroundColor Green
-Write-Host "Preview: http://$PiHost" -ForegroundColor Green
+Write-Host "Live URL: https://blog.zhehentiaohe.cn" -ForegroundColor Green
