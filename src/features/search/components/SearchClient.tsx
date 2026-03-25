@@ -117,7 +117,7 @@ export default function SearchClient({ items, initialQuery = '' }: Props) {
       .map((item) => ({ item, score: scoreItem(item, query) }))
       .filter(({ item, score }) => score > 0 && (activeFilter === 'all' || item.type === activeFilter))
       .sort((a, b) => b.score - a.score || a.item.title.localeCompare(b.item.title, 'zh-CN'))
-      .slice(0, 40)
+      .slice(0, 1500)
       .map(({ item }) => item);
   }, [activeFilter, items, query]);
 
@@ -142,7 +142,7 @@ export default function SearchClient({ items, initialQuery = '' }: Props) {
         <div className="search-panel card-surface">
           <div className="search-head">
             <label className="search-label" htmlFor="site-search">站内搜索</label>
-            <p className="search-note">可以搜索文章、分类、标签、页面、游戏条目和专题书架。桌面端可按 <kbd>⌘/Ctrl + K</kbd> 或 <kbd>/</kbd>。</p>
+            <p className="search-note">可以搜索文章、分类、标签、页面、游戏条目和专题书架。目前最多支持显示1500条搜索结果。桌面端可按 <kbd>⌘/Ctrl + K</kbd> 或 <kbd>/</kbd>。</p>
           </div>
 
           <div className="search-box-row">
